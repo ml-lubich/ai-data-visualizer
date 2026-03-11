@@ -38,9 +38,11 @@ See `package.json` scripts and `docs/` for full detail:
 - **Fallback demo mode**: When `OPENROUTER_API_KEY` is not set, the backend returns hardcoded
   BokehJS code that creates a simple bar chart. This is sufficient for testing the pipeline
   but the chart won't match the user's actual request semantics.
-- **OpenRouter integration**: The backend uses the OpenAI SDK pointed at `https://openrouter.ai/api/v1`.
-  Model names use the OpenRouter format (e.g., `anthropic/claude-sonnet-4-20250514`). Configure via
-  `OPENROUTER_API_KEY` and `LLM_MODEL` in `.env`.
+- **OpenRouter integration**: The backend calls `https://openrouter.ai/api/v1/chat/completions`
+  directly via `requests`. Target model is `openai/gpt-oss-120b` (GPT OSS 120B).
+  Configure via `OPENROUTER_API_KEY` and `LLM_MODEL` in `.env`.
+- **Gallery page**: `/gallery.html` has 10 pre-built interactive BokehJS examples (Q01-Q10)
+  serving as golden test outputs and acceptance criteria for LLM evaluation.
 - **ES modules everywhere**: `"type": "module"` in `package.json`. All `.js` use `import`/`export`.
 - **Python path**: `pip` installs to `~/.local/bin`. Ensure this is on `PATH`.
 - **Code execution security**: Generated JS code is run via `new Function()` in the browser.
