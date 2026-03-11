@@ -5,20 +5,20 @@ Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
 LLM client abstraction for chart code generation.
-Uses OpenRouter (OpenAI-compatible API) to access frontier models.
+Uses OpenRouter API directly via requests (no SDK dependency).
 """
 
 import re
 import logging
 
-from openai import OpenAI, APIError
+import requests
 
 from server.config import OPENROUTER_API_KEY, LLM_MODEL, LLM_MAX_TOKENS
 from server.prompt_templates import build_prompt
 
 logger = logging.getLogger(__name__)
 
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 _JS_CODE_FENCE = re.compile(r"```(?:javascript|js)\s*\n(.*?)```", re.DOTALL)
 
@@ -45,31 +45,43 @@ def generate_chart_code(question: str, columns: list[str], row_count: int,
     system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
 
     try:
-        client = OpenAI(
-            base_url=OPENROUTER_BASE_URL,
-            api_key=OPENROUTER_API_KEY,
+        resp = requests.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "http://localhost:5173",
+                "X-Title": "AI Data Visualizer",
+            },
+            json={
+                "model": LLM_MODEL,
+                "max_tokens": LLM_MAX_TOKENS,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            },
+            timeout=60,
         )
 
-        completion = client.chat.completions.create(
-            model=LLM_MODEL,
-            max_tokens=LLM_MAX_TOKENS,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-        )
+        body = resp.json()
 
-        raw_text = completion.choices[0].message.content
+        if not resp.ok:
+            error_msg = body.get("error", {}).get("message", f"HTTP {resp.status_code}")
+            logger.error("OpenRouter error (%d): %s", resp.status_code, error_msg)
+            return {"code": "", "model": LLM_MODEL, "error": error_msg}
+
+        raw_text = body["choices"][0]["message"]["content"]
+        actual_model = body.get("model", LLM_MODEL)
         code = _extract_js_code(raw_text)
-        actual_model = completion.model or LLM_MODEL
         return {"code": code, "model": actual_model, "error": None}
 
-    except APIError as exc:
-        logger.error("OpenRouter API error: %s", exc)
+    except requests.RequestException as exc:
+        logger.error("OpenRouter request error: %s", exc)
         return {"code": "", "model": LLM_MODEL, "error": str(exc)}
-    except Exception as exc:
-        logger.error("Unexpected LLM error: %s", exc)
-        return {"code": "", "model": LLM_MODEL, "error": str(exc)}
+    except (KeyError, IndexError) as exc:
+        logger.error("Unexpected OpenRouter response format: %s", exc)
+        return {"code": "", "model": LLM_MODEL, "error": f"Bad response format: {exc}"}
 
 
 def _fallback_demo_code(question: str, columns: list[str]) -> dict:
