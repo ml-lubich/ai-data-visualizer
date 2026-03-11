@@ -1,0 +1,29 @@
+{
+  "name": "ai-data-visualizer",
+  "version": "1.0.0",
+  "description": "AI-powered visualizations via JS / HTML",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ml-lubich/ai-data-visualizer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ml-lubich/ai-data-visualizer/issues"
+  },
+  "homepage": "https://github.com/ml-lubich/ai-data-visualizer#readme",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
+}

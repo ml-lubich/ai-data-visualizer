@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Data Visualizer</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>📊 AI Data Visualizer</h1>
+      <p class="subtitle">Describe a chart and the AI will create it for you</p>
+    </header>
+
+    <main>
+      <section class="chart-area" id="chart-area">
+        <div class="placeholder" id="placeholder">
+          <span>Your visualization will appear here</span>
+        </div>
+        <canvas id="chart-canvas"></canvas>
+      </section>
+
+      <section class="chat-area">
+        <div class="messages" id="messages"></div>
+        <form id="chat-form" class="chat-input">
+          <textarea
+            id="user-input"
+            placeholder="Describe the chart you want, e.g. 'Show a bar chart of monthly sales: Jan 100, Feb 150, Mar 200'"
+            rows="2"
+          ></textarea>
+          <button type="submit" id="send-btn">Send</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
