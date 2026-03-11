@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "Show total sales by region as a bar chart",
+    "description": "Basic bar chart — aggregation by categorical column",
+    "expected_chart_type": "bar"
+  },
+  {
+    "id": 2,
+    "question": "Create a line chart of total revenue over time (monthly)",
+    "description": "Time-series line chart — date grouping",
+    "expected_chart_type": "line"
+  },
+  {
+    "id": 3,
+    "question": "Plot a scatter chart of quantity sold vs profit for each transaction",
+    "description": "Scatter plot — two continuous variables",
+    "expected_chart_type": "scatter"
+  },
+  {
+    "id": 4,
+    "question": "Show the distribution of sale amounts as a histogram",
+    "description": "Histogram — single continuous variable distribution",
+    "expected_chart_type": "quad"
+  },
+  {
+    "id": 5,
+    "question": "Display the top 10 products by total revenue, sorted descending",
+    "description": "Sorted horizontal bar chart — filtering + ranking",
+    "expected_chart_type": "bar"
+  },
+  {
+    "id": 6,
+    "question": "Create a grouped bar chart comparing average sales by region and product category",
+    "description": "Grouped bar chart — two categorical dimensions",
+    "expected_chart_type": "bar"
+  },
+  {
+    "id": 7,
+    "question": "Show monthly sales with a 3-month rolling average trend line",
+    "description": "Line chart with rolling average overlay",
+    "expected_chart_type": "line"
+  },
+  {
+    "id": 8,
+    "question": "Create a stacked bar chart of quarterly sales broken down by product category",
+    "description": "Stacked bar chart — categorical + temporal aggregation",
+    "expected_chart_type": "bar"
+  },
+  {
+    "id": 9,
+    "question": "Show only profitable transactions (profit > 0) and visualize their distribution by region as a box plot or bar chart",
+    "description": "Filtered view — conditional data + distribution",
+    "expected_chart_type": "bar"
+  },
+  {
+    "id": 10,
+    "question": "Plot the correlation between discount percentage and profit margin using a scatter chart, color-coded by region",
+    "description": "Scatter with color encoding — multi-dimensional analysis",
+    "expected_chart_type": "scatter"
+  }
+]

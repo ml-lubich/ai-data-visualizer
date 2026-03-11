@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Data Visualizer</title>
+
+  <!-- BokehJS CDN -->
+  <link rel="stylesheet"
+        href="https://cdn.bokeh.org/bokeh/release/bokeh-3.5.2.min.css" />
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.5.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.5.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.5.2.min.js"></script>
+
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="header-left">
+        <span class="logo">📊</span>
+        <h1>AI Data Visualizer</h1>
+      </div>
+      <div class="header-right">
+        <span id="model-badge" class="badge">Loading…</span>
+      </div>
+    </header>
+
+    <!-- ── Main Layout ── -->
+    <main class="main">
+      <!-- ── Sidebar (chat + upload) ── -->
+      <aside class="sidebar">
+        <!-- Upload -->
+        <section class="upload-section">
+          <h2>Data</h2>
+          <label class="upload-btn" for="csv-input">
+            <span id="upload-label">📁 Upload CSV</span>
+            <input type="file" id="csv-input" accept=".csv" hidden />
+          </label>
+          <div id="data-info" class="data-info hidden"></div>
+        </section>
+
+        <!-- Chat -->
+        <section class="chat-section">
+          <h2>Chat</h2>
+          <div id="chat-messages" class="chat-messages"></div>
+          <div class="chat-input-row">
+            <textarea
+              id="chat-input"
+              class="chat-input"
+              placeholder="Describe the chart you want… (Enter to send, Shift+Enter for new line)"
+              rows="3"
+              disabled
+            ></textarea>
+            <button id="send-btn" class="send-btn" disabled>Send</button>
+          </div>
+        </section>
+
+        <!-- Suggested questions -->
+        <section class="suggestions-section">
+          <h2>Suggestions</h2>
+          <div id="suggestions" class="suggestions"></div>
+        </section>
+      </aside>
+
+      <!-- ── Chart area ── -->
+      <section class="chart-area">
+        <div id="chart-placeholder" class="chart-placeholder">
+          <div class="placeholder-content">
+            <span class="placeholder-icon">📈</span>
+            <p>Upload a CSV file and ask for a visualization to get started.</p>
+          </div>
+        </div>
+        <div id="bokeh-chart" class="bokeh-chart hidden"></div>
+        <details id="code-details" class="code-details hidden">
+          <summary>Generated Bokeh code</summary>
+          <pre id="code-block" class="code-block"></pre>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
