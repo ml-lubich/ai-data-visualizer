@@ -5,7 +5,7 @@
 ### Overview
 
 **ai-data-visualizer** is an AI-powered single-page web application that generates interactive
-BokehJS data visualizations from natural language requests via a chat interface.
+Plotly.js data visualizations from natural language requests via a chat interface.
 Context: AIGIS Platform (Polaris Wireless).
 
 ### Architecture
@@ -32,20 +32,23 @@ See `package.json` scripts and `docs/` for full detail:
 
 ### Non-obvious caveats
 
-- **BokehJS is loaded via CDN** (`index.html`), not npm. The `Bokeh` global is expected in
+- **Plotly.js is loaded via CDN** (`index.html`), not npm. The `Plotly` global is expected in
   browser-executed code. It is NOT available in Vitest (jsdom) - browser-level chart tests
   require manual testing via `computerUse`.
 - **Fallback demo mode**: When `OPENROUTER_API_KEY` is not set, the backend returns hardcoded
-  BokehJS code that creates a simple bar chart. This is sufficient for testing the pipeline
+  Plotly.js code that creates a simple bar chart. This is sufficient for testing the pipeline
   but the chart won't match the user's actual request semantics.
 - **OpenRouter integration**: The backend calls `https://openrouter.ai/api/v1/chat/completions`
   directly via `requests`. Target model is `openai/gpt-oss-120b` (GPT OSS 120B).
   Configure via `OPENROUTER_API_KEY` and `LLM_MODEL` in `.env`.
-- **Gallery page**: `/gallery.html` has 10 pre-built interactive BokehJS examples (Q01-Q10)
+- **Gallery page**: `/gallery.html` has 10 pre-built interactive Plotly.js examples (Q01-Q10)
   serving as golden test outputs and acceptance criteria for LLM evaluation.
 - **ES modules everywhere**: `"type": "module"` in `package.json`. All `.js` use `import`/`export`.
 - **Python path**: `pip` installs to `~/.local/bin`. Ensure this is on `PATH`.
 - **Code execution security**: Generated JS code is run via `new Function()` in the browser.
   Acceptable for internal prototype; needs sandboxing for production.
+- **Plotly.js chosen over BokehJS**: Research shows LLMs generate much better Plotly.js code
+  (18K+ GitHub stars, declarative JSON API, included in LLM benchmarks). BokehJS standalone
+  API had multiple compatibility issues with `fig.xaxis[0]` array indexing.
 - The `server/` directory is a Python package with `__init__.py`. Backend tests import via
   `sys.path` manipulation - run them from the project root.

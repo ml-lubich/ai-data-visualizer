@@ -14,7 +14,7 @@ export default [
         setTimeout: "readonly",
         clearTimeout: "readonly",
         fetch: "readonly",
-        Bokeh: "readonly",
+        Plotly: "readonly",
         Function: "readonly",
       },
     },

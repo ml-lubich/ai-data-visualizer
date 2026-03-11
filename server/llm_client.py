@@ -85,7 +85,7 @@ def generate_chart_code(question: str, columns: list[str], row_count: int,
 
 
 def _fallback_demo_code(question: str, columns: list[str]) -> dict:
-    """Generate a simple fallback chart when no API key is configured."""
+    """Generate a simple fallback Plotly.js chart when no API key is configured."""
     value_col = None
     label_col = None
     for col in columns:
@@ -102,34 +102,24 @@ def _fallback_demo_code(question: str, columns: list[str]) -> dict:
     code = f"""
 // Fallback demo (no API key configured)
 const data = window.__chartData;
-const target = document.getElementById("visualization-target");
-target.innerHTML = "";
-
 const grouped = {{}};
 for (const row of data) {{
   const key = row["{label_col}"];
   if (!grouped[key]) grouped[key] = 0;
   grouped[key] += parseFloat(row["{value_col}"]) || 0;
 }}
-
 const labels = Object.keys(grouped);
 const values = Object.values(grouped);
 
-const fig = Bokeh.Plotting.figure({{
+Plotly.newPlot("visualization-target", [{{
+  x: labels, y: values, type: "bar",
+  marker: {{ color: "#3b82f6" }},
+  hovertemplate: "<b>%{{x}}</b><br>{value_col}: %{{y:,.2f}}<extra></extra>",
+}}], {{
   title: "{question.replace('"', "'")}",
-  x_range: labels,
-  width: 700,
-  height: 400,
-  toolbar_location: "above",
-}});
-
-const source = new Bokeh.ColumnDataSource({{
-  data: {{ x: labels, top: values }}
-}});
-
-fig.vbar({{ x: {{ field: "x" }}, top: {{ field: "top" }}, width: 0.7, source: source,
-  fill_color: "#3b82f6", line_color: "#1e40af" }});
-
-Bokeh.Plotting.show(fig, "#visualization-target");
+  paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+  font: {{ color: "#e2e8f0" }},
+  xaxis: {{ title: "{label_col}" }}, yaxis: {{ title: "{value_col}" }},
+}}, {{ responsive: true }});
 """
     return {"code": code.strip(), "model": "fallback-demo", "error": None}

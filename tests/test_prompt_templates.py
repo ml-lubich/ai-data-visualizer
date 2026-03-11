@@ -58,12 +58,12 @@ def test_build_prompt_includes_row_count():
     assert "42" in user
 
 
-def test_system_prompt_mentions_bokehjs():
+def test_system_prompt_mentions_plotly():
     system, _ = build_prompt(
         question="test",
         columns=["a"],
         row_count=1,
         sample_rows=[],
     )
-    assert "BokehJS" in system
-    assert "Bokeh" in system
+    assert "Plotly" in system
+    assert "Plotly.newPlot" in system
