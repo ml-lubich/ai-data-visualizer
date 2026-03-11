@@ -102,7 +102,7 @@ async function init() {
     const health = await checkHealth();
     if (!health.llm_configured) {
       addMessage(
-        "Note: No LLM API key configured. Using fallback demo mode. Set ANTHROPIC_API_KEY for full AI generation.",
+        "Note: No LLM API key configured. Using fallback demo mode. Set OPENROUTER_API_KEY for full AI generation.",
         "system"
       );
     }

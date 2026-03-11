@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from server.config import SERVER_PORT, SERVER_HOST, CORS_ORIGINS, ANTHROPIC_API_KEY
+from server.config import SERVER_PORT, SERVER_HOST, CORS_ORIGINS, OPENROUTER_API_KEY
 from server.llm_client import generate_chart_code
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -32,7 +32,7 @@ def health():
     """Health check endpoint."""
     return jsonify({
         "status": "ok",
-        "llm_configured": bool(ANTHROPIC_API_KEY),
+        "llm_configured": bool(OPENROUTER_API_KEY),
     })
 
 
@@ -74,5 +74,5 @@ def visualize():
 
 if __name__ == "__main__":
     logger.info("Starting ai-data-visualizer backend on %s:%d", SERVER_HOST, SERVER_PORT)
-    logger.info("LLM configured: %s", bool(ANTHROPIC_API_KEY))
+    logger.info("LLM configured: %s", bool(OPENROUTER_API_KEY))
     app.run(host=SERVER_HOST, port=SERVER_PORT, debug=True)

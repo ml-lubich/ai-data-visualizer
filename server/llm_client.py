@@ -5,17 +5,20 @@ Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
 LLM client abstraction for chart code generation.
+Uses OpenRouter (OpenAI-compatible API) to access frontier models.
 """
 
 import re
 import logging
 
-import anthropic
+from openai import OpenAI, APIError
 
-from server.config import ANTHROPIC_API_KEY, LLM_MODEL, LLM_MAX_TOKENS
+from server.config import OPENROUTER_API_KEY, LLM_MODEL, LLM_MAX_TOKENS
 from server.prompt_templates import build_prompt
 
 logger = logging.getLogger(__name__)
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 _JS_CODE_FENCE = re.compile(r"```(?:javascript|js)\s*\n(.*?)```", re.DOTALL)
 
@@ -31,30 +34,41 @@ def _extract_js_code(response_text: str) -> str:
 def generate_chart_code(question: str, columns: list[str], row_count: int,
                         sample_rows: list[dict]) -> dict:
     """
-    Call the LLM to generate BokehJS chart code.
+    Call the LLM via OpenRouter to generate BokehJS chart code.
 
     Returns dict with keys: code (str), model (str), error (str|None).
     """
-    if not ANTHROPIC_API_KEY:
-        logger.warning("ANTHROPIC_API_KEY not set; returning fallback demo code")
+    if not OPENROUTER_API_KEY:
+        logger.warning("OPENROUTER_API_KEY not set; returning fallback demo code")
         return _fallback_demo_code(question, columns)
 
     system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
 
     try:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        message = client.messages.create(
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
+
+        completion = client.chat.completions.create(
             model=LLM_MODEL,
             max_tokens=LLM_MAX_TOKENS,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
         )
-        raw_text = message.content[0].text
-        code = _extract_js_code(raw_text)
-        return {"code": code, "model": LLM_MODEL, "error": None}
 
-    except anthropic.APIError as exc:
-        logger.error("Anthropic API error: %s", exc)
+        raw_text = completion.choices[0].message.content
+        code = _extract_js_code(raw_text)
+        actual_model = completion.model or LLM_MODEL
+        return {"code": code, "model": actual_model, "error": None}
+
+    except APIError as exc:
+        logger.error("OpenRouter API error: %s", exc)
+        return {"code": "", "model": LLM_MODEL, "error": str(exc)}
+    except Exception as exc:
+        logger.error("Unexpected LLM error: %s", exc)
         return {"code": "", "model": LLM_MODEL, "error": str(exc)}
 
 

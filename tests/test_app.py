@@ -9,6 +9,7 @@ Integration tests for Flask backend routes.
 
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -48,7 +49,13 @@ def test_visualize_requires_columns(client):
     assert "columns" in resp.get_json()["error"]
 
 
-def test_visualize_returns_code(client):
+@patch("server.app.generate_chart_code")
+def test_visualize_returns_code(mock_generate, client):
+    mock_generate.return_value = {
+        "code": "const x = 1;",
+        "model": "test-model",
+        "error": None,
+    }
     resp = client.post("/api/visualize", json={
         "question": "show a bar chart",
         "columns": ["region", "revenue"],
@@ -57,6 +64,25 @@ def test_visualize_returns_code(client):
     })
     assert resp.status_code == 200
     data = resp.get_json()
-    assert "code" in data
-    assert len(data["code"]) > 0
+    assert data["code"] == "const x = 1;"
+    assert data["model"] == "test-model"
     assert data["error"] is None
+    mock_generate.assert_called_once()
+
+
+@patch("server.app.generate_chart_code")
+def test_visualize_returns_502_on_llm_error(mock_generate, client):
+    mock_generate.return_value = {
+        "code": "",
+        "model": "test-model",
+        "error": "API error: 401",
+    }
+    resp = client.post("/api/visualize", json={
+        "question": "show a bar chart",
+        "columns": ["region", "revenue"],
+        "row_count": 10,
+        "sample_rows": [{"region": "North", "revenue": 100}],
+    })
+    assert resp.status_code == 502
+    data = resp.get_json()
+    assert data["error"] == "API error: 401"
