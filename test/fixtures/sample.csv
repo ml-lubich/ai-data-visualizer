@@ -1,0 +1,17 @@
+region,sales,quarter,profit
+North,120,Q1,45
+South,95,Q1,32
+East,150,Q1,60
+West,110,Q1,38
+North,135,Q2,52
+South,100,Q2,35
+East,160,Q2,65
+West,125,Q2,48
+North,140,Q3,55
+South,115,Q3,42
+East,170,Q3,68
+West,130,Q3,50
+North,155,Q4,62
+South,120,Q4,48
+East,180,Q4,72
+West,145,Q4,58
