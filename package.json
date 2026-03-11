@@ -1,0 +1,31 @@
+{
+  "name": "ai-data-visualizer",
+  "version": "0.1.0",
+  "description": "AI-powered visualizations via JS / HTML",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "ai",
+    "data-visualization",
+    "javascript"
+  ],
+  "author": "Misha Lubich <michaelle.lubich@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1"
+  }
+}
