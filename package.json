@@ -1,7 +1,7 @@
 {
   "name": "ai-data-visualizer",
-  "version": "0.1.0",
-  "description": "AI-powered visualizations via JS / HTML",
+  "version": "0.2.0",
+  "description": "AI-powered data visualizations via JS / HTML - AIGIS Platform",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,22 +10,29 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "server": "python3 server/app.py",
+    "start": "concurrently \"npm run dev\" \"npm run server\""
   },
   "keywords": [
     "ai",
     "data-visualization",
-    "javascript"
+    "javascript",
+    "bokehjs",
+    "aigis"
   ],
-  "author": "Misha Lubich <michaelle.lubich@gmail.com>",
-  "license": "MIT",
+  "author": "Misha Lubich <mlubich@polariswireless.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "papaparse": "^5.5.3"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^10.0.3",
+    "jsdom": "^28.1.0",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "chart.js": "^4.5.1"
   }
 }
