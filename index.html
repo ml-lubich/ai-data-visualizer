@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Data Visualizer - AIGIS Platform</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>AI Data Visualizer</h1>
+        <p class="subtitle">AIGIS Platform - AI-powered visualizations</p>
+      </header>
+
+      <main>
+        <section class="viz-panel">
+          <div class="viz-toolbar">
+            <label class="upload-btn" for="csv-upload">
+              <span id="upload-label">Upload CSV</span>
+              <input type="file" id="csv-upload" accept=".csv" />
+            </label>
+            <span id="data-status" class="data-status">No data loaded</span>
+          </div>
+          <div id="visualization-target" class="viz-canvas">
+            <div class="placeholder">Upload a CSV file and ask a question to generate a visualization.</div>
+          </div>
+        </section>
+
+        <section class="chat-panel">
+          <div id="chat-messages" class="chat-messages"></div>
+          <form id="chat-form" class="chat-input-area">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Describe the visualization you want..."
+              autocomplete="off"
+              disabled
+            />
+            <button type="submit" id="send-btn" disabled>Send</button>
+          </form>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

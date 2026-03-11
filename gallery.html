@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Data Visualizer - 10 Canonical Examples</title>
+    <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+      #app { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+      header { text-align: center; margin-bottom: 1.5rem; }
+      header h1 { font-size: 1.6rem; background: linear-gradient(135deg, #38bdf8, #818cf8);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+      header p { color: #64748b; font-size: 0.85rem; margin-top: 0.25rem; }
+
+      .nav { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+      .nav button { padding: 0.4rem 0.8rem; border: 1px solid #334155; border-radius: 0.375rem;
+        background: #1e293b; color: #94a3b8; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+      .nav button:hover { border-color: #3b82f6; color: #e2e8f0; }
+      .nav button.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+      .example-info { background: #1e293b; border-radius: 0.75rem; padding: 1rem 1.5rem; margin-bottom: 1rem; }
+      .example-info h2 { font-size: 1.1rem; color: #38bdf8; margin-bottom: 0.5rem; }
+      .example-info .question { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.25rem; }
+      .example-info .meta { color: #64748b; font-size: 0.8rem; }
+      .example-info .interactions { color: #34d399; font-size: 0.8rem; margin-top: 0.25rem; }
+
+      #visualization-target { background: #1e293b; border-radius: 0.75rem; padding: 1.5rem;
+        min-height: 450px; overflow: auto; }
+      #visualization-target .bk-root { background: transparent !important; }
+
+      .controls { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+      .controls button { padding: 0.6rem 1.5rem; border: none; border-radius: 0.5rem;
+        background: #3b82f6; color: #fff; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+      .controls button:hover { background: #2563eb; }
+      .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>10 Canonical Interactive Chart Examples</h1>
+        <p>AIGIS Platform - Click, hover, sort, zoom - fully interactive BokehJS visualizations</p>
+      </header>
+
+      <div class="nav" id="nav-buttons"></div>
+
+      <div class="example-info" id="example-info">
+        <h2 id="example-type"></h2>
+        <div class="question" id="example-question"></div>
+        <div class="meta" id="example-meta"></div>
+        <div class="interactions" id="example-interactions"></div>
+      </div>
+
+      <div id="visualization-target"></div>
+
+      <div class="controls">
+        <button id="prev-btn" onclick="navigate(-1)">Previous</button>
+        <button id="next-btn" onclick="navigate(1)">Next</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { CANONICAL_EXAMPLES } from "/src/examples/canonical-examples.js";
+      import Papa from "papaparse";
+
+      let currentIndex = 0;
+      let chartData = [];
+
+      async function loadData() {
+        const resp = await fetch("/sample_data/sales.csv");
+        const text = await resp.text();
+        const result = Papa.parse(text, { header: true, skipEmptyLines: true, dynamicTyping: true });
+        chartData = result.data;
+        window.__chartData = chartData;
+      }
+
+      function renderExample(index) {
+        currentIndex = index;
+        const ex = CANONICAL_EXAMPLES[index];
+
+        document.getElementById("example-type").textContent = ex.id + ": " + ex.type;
+        document.getElementById("example-question").textContent = '"' + ex.question + '"';
+        document.getElementById("example-meta").textContent = "Chart type: " + ex.type;
+        document.getElementById("example-interactions").textContent = "Interactions: " + ex.interactions;
+
+        document.querySelectorAll(".nav button").forEach((btn, i) => {
+          btn.classList.toggle("active", i === index);
+        });
+
+        document.getElementById("prev-btn").disabled = index === 0;
+        document.getElementById("next-btn").disabled = index === CANONICAL_EXAMPLES.length - 1;
+
+        window.__chartData = chartData;
+        const target = document.getElementById("visualization-target");
+        target.innerHTML = "";
+
+        try {
+          const fn = new Function(ex.code);
+          fn();
+        } catch (err) {
+          target.innerHTML = '<div style="color:#ef4444;padding:2rem;">Error: ' + err.message + '</div>';
+        }
+      }
+
+      window.navigate = function(dir) {
+        const next = currentIndex + dir;
+        if (next >= 0 && next < CANONICAL_EXAMPLES.length) {
+          renderExample(next);
+        }
+      };
+
+      async function init() {
+        await loadData();
+
+        const nav = document.getElementById("nav-buttons");
+        CANONICAL_EXAMPLES.forEach((ex, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = ex.id;
+          btn.onclick = () => renderExample(i);
+          nav.appendChild(btn);
+        });
+
+        renderExample(0);
+      }
+
+      init();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,76 @@
+{
+  "description": "10 benchmark questions for AI data visualization evaluation. Align with Rodrigo.",
+  "dataset": "sample_data/sales.csv",
+  "questions": [
+    {
+      "id": "Q01",
+      "question": "Show me a bar chart of total revenue by region",
+      "expected_chart_type": "bar",
+      "difficulty": "basic",
+      "tests_capability": "aggregation, categorical axis"
+    },
+    {
+      "id": "Q02",
+      "question": "Create a line chart of monthly revenue trends",
+      "expected_chart_type": "line",
+      "difficulty": "basic",
+      "tests_capability": "time series, date parsing"
+    },
+    {
+      "id": "Q03",
+      "question": "Show a scatter plot of units sold vs revenue",
+      "expected_chart_type": "scatter",
+      "difficulty": "basic",
+      "tests_capability": "two numeric axes, correlation"
+    },
+    {
+      "id": "Q04",
+      "question": "Create a pie chart showing the revenue share of each product",
+      "expected_chart_type": "pie/wedge",
+      "difficulty": "medium",
+      "tests_capability": "aggregation, angular geometry (BokehJS wedge)"
+    },
+    {
+      "id": "Q05",
+      "question": "Show the top 3 regions by total units sold as a horizontal bar chart",
+      "expected_chart_type": "horizontal_bar",
+      "difficulty": "medium",
+      "tests_capability": "sorting, filtering (top N), orientation"
+    },
+    {
+      "id": "Q06",
+      "question": "Show a grouped bar chart comparing revenue by product for each region",
+      "expected_chart_type": "grouped_bar",
+      "difficulty": "hard",
+      "tests_capability": "multi-series, grouping, dodged bars"
+    },
+    {
+      "id": "Q07",
+      "question": "Create a stacked bar chart of revenue by month, broken down by product",
+      "expected_chart_type": "stacked_bar",
+      "difficulty": "hard",
+      "tests_capability": "stacking, time grouping, multi-series"
+    },
+    {
+      "id": "Q08",
+      "question": "Show profit margin (revenue minus cost) for each product as a bar chart, sorted highest to lowest",
+      "expected_chart_type": "bar",
+      "difficulty": "medium",
+      "tests_capability": "calculated field, sorting"
+    },
+    {
+      "id": "Q09",
+      "question": "Create a histogram showing the distribution of individual sale revenues",
+      "expected_chart_type": "histogram",
+      "difficulty": "medium",
+      "tests_capability": "binning, continuous distribution"
+    },
+    {
+      "id": "Q10",
+      "question": "Show a multi-line chart with separate lines for each product's monthly revenue trend",
+      "expected_chart_type": "multi_line",
+      "difficulty": "hard",
+      "tests_capability": "multi-series lines, legend, time grouping"
+    }
+  ]
+}
