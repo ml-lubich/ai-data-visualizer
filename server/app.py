@@ -5,7 +5,7 @@ Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
 Flask backend for ai-data-visualizer.
-Provides /api/visualize endpoint that proxies to the configured LLM.
+Provides /api/visualize endpoint -- every chart is coded from scratch by the LLM.
 """
 
 import logging
@@ -17,7 +17,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from server.config import SERVER_PORT, SERVER_HOST, CORS_ORIGINS, OPENROUTER_API_KEY
+import requests as http_requests
+
+from server.config import (
+    SERVER_PORT, SERVER_HOST, CORS_ORIGINS,
+    OPENROUTER_API_KEY, LLM_MODEL, OLLAMA_URL, OLLAMA_MODEL,
+)
 from server.llm_client import generate_chart_code
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -27,25 +32,35 @@ app = Flask(__name__)
 CORS(app, origins=CORS_ORIGINS)
 
 
+def _ollama_available() -> bool:
+    try:
+        resp = http_requests.get(f"{OLLAMA_URL}/api/tags", timeout=2)
+        return resp.ok
+    except Exception:
+        return False
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
-    """Health check endpoint."""
+    """Health check: shows which LLM providers are available."""
+    ollama_up = _ollama_available()
     return jsonify({
         "status": "ok",
-        "llm_configured": bool(OPENROUTER_API_KEY),
+        "openrouter_configured": bool(OPENROUTER_API_KEY),
+        "openrouter_model": LLM_MODEL if OPENROUTER_API_KEY else None,
+        "ollama_available": ollama_up,
+        "ollama_model": OLLAMA_MODEL if ollama_up else None,
     })
 
 
 @app.route("/api/visualize", methods=["POST"])
 def visualize():
     """
-    Generate BokehJS chart code from a natural language question.
+    Generate Plotly.js chart code from a natural language question.
+    The LLM codes everything from scratch -- no templates.
 
-    Expects JSON body:
-      { "question": str, "columns": [str], "row_count": int, "sample_rows": [dict] }
-
-    Returns JSON:
-      { "code": str, "model": str, "error": str|null }
+    Expects JSON: { "question": str, "columns": [str], "row_count": int, "sample_rows": [dict] }
+    Returns JSON: { "code": str, "model": str, "error": str|null }
     """
     body = request.get_json(silent=True)
     if not body:
@@ -74,5 +89,6 @@ def visualize():
 
 if __name__ == "__main__":
     logger.info("Starting ai-data-visualizer backend on %s:%d", SERVER_HOST, SERVER_PORT)
-    logger.info("LLM configured: %s", bool(OPENROUTER_API_KEY))
+    logger.info("OpenRouter: %s (model: %s)", "configured" if OPENROUTER_API_KEY else "not configured", LLM_MODEL)
+    logger.info("Ollama: %s (model: %s)", "available" if _ollama_available() else "not available", OLLAMA_MODEL)
     app.run(host=SERVER_HOST, port=SERVER_PORT, debug=True)

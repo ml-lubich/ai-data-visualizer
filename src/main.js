@@ -100,11 +100,14 @@ async function init() {
 
   try {
     const health = await checkHealth();
-    if (!health.llm_configured) {
-      addMessage(
-        "Note: No LLM API key configured. Using fallback demo mode. Set OPENROUTER_API_KEY for full AI generation.",
-        "system"
-      );
+    const providers = [];
+    if (health.openrouter_configured) providers.push("OpenRouter (" + health.openrouter_model + ")");
+    if (health.ollama_available) providers.push("Ollama (" + health.ollama_model + ")");
+
+    if (providers.length > 0) {
+      addMessage("LLM ready: " + providers.join(" | "), "system");
+    } else {
+      addMessage("No LLM available. Set OPENROUTER_API_KEY or start Ollama.", "system");
     }
   } catch (_err) {
     addMessage(

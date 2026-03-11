@@ -4,8 +4,9 @@ AIGIS Platform Team
 Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
-LLM client abstraction for chart code generation.
-Uses OpenRouter API directly via requests (no SDK dependency).
+LLM client: the model codes every visualization from scratch.
+No templates, no fallbacks -- raw LLM code generation.
+Tries OpenRouter first, falls back to local Ollama.
 """
 
 import re
@@ -13,7 +14,10 @@ import logging
 
 import requests
 
-from server.config import OPENROUTER_API_KEY, LLM_MODEL, LLM_MAX_TOKENS
+from server.config import (
+    OPENROUTER_API_KEY, LLM_MODEL, LLM_MAX_TOKENS,
+    OLLAMA_URL, OLLAMA_MODEL,
+)
 from server.prompt_templates import build_prompt
 
 logger = logging.getLogger(__name__)
@@ -31,18 +35,10 @@ def _extract_js_code(response_text: str) -> str:
     return response_text.strip()
 
 
-def generate_chart_code(question: str, columns: list[str], row_count: int,
-                        sample_rows: list[dict]) -> dict:
-    """
-    Call the LLM via OpenRouter to generate BokehJS chart code.
-
-    Returns dict with keys: code (str), model (str), error (str|None).
-    """
+def _call_openrouter(system_prompt: str, user_prompt: str) -> dict:
+    """Try OpenRouter API. Returns result dict or None on failure."""
     if not OPENROUTER_API_KEY:
-        logger.warning("OPENROUTER_API_KEY not set; returning fallback demo code")
-        return _fallback_demo_code(question, columns)
-
-    system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
+        return None
 
     try:
         resp = requests.post(
@@ -63,63 +59,67 @@ def generate_chart_code(question: str, columns: list[str], row_count: int,
             },
             timeout=60,
         )
-
         body = resp.json()
 
         if not resp.ok:
             error_msg = body.get("error", {}).get("message", f"HTTP {resp.status_code}")
-            logger.error("OpenRouter error (%d): %s", resp.status_code, error_msg)
-            return {"code": "", "model": LLM_MODEL, "error": error_msg}
+            logger.warning("OpenRouter failed (%d): %s -- trying Ollama", resp.status_code, error_msg)
+            return None
 
         raw_text = body["choices"][0]["message"]["content"]
         actual_model = body.get("model", LLM_MODEL)
         code = _extract_js_code(raw_text)
         return {"code": code, "model": actual_model, "error": None}
 
-    except requests.RequestException as exc:
-        logger.error("OpenRouter request error: %s", exc)
-        return {"code": "", "model": LLM_MODEL, "error": str(exc)}
-    except (KeyError, IndexError) as exc:
-        logger.error("Unexpected OpenRouter response format: %s", exc)
-        return {"code": "", "model": LLM_MODEL, "error": f"Bad response format: {exc}"}
+    except Exception as exc:
+        logger.warning("OpenRouter error: %s -- trying Ollama", exc)
+        return None
 
 
-def _fallback_demo_code(question: str, columns: list[str]) -> dict:
-    """Generate a simple fallback Plotly.js chart when no API key is configured."""
-    value_col = None
-    label_col = None
-    for col in columns:
-        if col in ("revenue", "units_sold", "cost", "value", "amount", "count"):
-            value_col = col
-        if col in ("region", "product", "category", "name", "date"):
-            label_col = col
+def _call_ollama(system_prompt: str, user_prompt: str) -> dict:
+    """Call local Ollama instance. The LLM codes everything from scratch."""
+    try:
+        resp = requests.post(
+            f"{OLLAMA_URL}/api/chat",
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "stream": False,
+                "options": {"num_predict": LLM_MAX_TOKENS, "temperature": 0.2},
+            },
+            timeout=180,
+        )
 
-    if not value_col and len(columns) > 1:
-        value_col = columns[-1]
-    if not label_col and len(columns) > 0:
-        label_col = columns[0]
+        if not resp.ok:
+            return {"code": "", "model": OLLAMA_MODEL, "error": f"Ollama HTTP {resp.status_code}"}
 
-    code = f"""
-// Fallback demo (no API key configured)
-const data = window.__chartData;
-const grouped = {{}};
-for (const row of data) {{
-  const key = row["{label_col}"];
-  if (!grouped[key]) grouped[key] = 0;
-  grouped[key] += parseFloat(row["{value_col}"]) || 0;
-}}
-const labels = Object.keys(grouped);
-const values = Object.values(grouped);
+        body = resp.json()
+        raw_text = body["message"]["content"]
+        code = _extract_js_code(raw_text)
+        return {"code": code, "model": f"ollama/{OLLAMA_MODEL}", "error": None}
 
-Plotly.newPlot("visualization-target", [{{
-  x: labels, y: values, type: "bar",
-  marker: {{ color: "#3b82f6" }},
-  hovertemplate: "<b>%{{x}}</b><br>{value_col}: %{{y:,.2f}}<extra></extra>",
-}}], {{
-  title: "{question.replace('"', "'")}",
-  paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: {{ color: "#e2e8f0" }},
-  xaxis: {{ title: "{label_col}" }}, yaxis: {{ title: "{value_col}" }},
-}}, {{ responsive: true }});
-"""
-    return {"code": code.strip(), "model": "fallback-demo", "error": None}
+    except requests.ConnectionError:
+        return {"code": "", "model": OLLAMA_MODEL,
+                "error": "Ollama not running. Start with: ollama serve"}
+    except Exception as exc:
+        logger.error("Ollama error: %s", exc)
+        return {"code": "", "model": OLLAMA_MODEL, "error": str(exc)}
+
+
+def generate_chart_code(question: str, columns: list[str], row_count: int,
+                        sample_rows: list[dict]) -> dict:
+    """
+    Ask the LLM to code a Plotly.js visualization from scratch.
+    Tries OpenRouter first, falls back to local Ollama.
+    No templates -- every chart is generated fresh by the model.
+    """
+    system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
+
+    result = _call_openrouter(system_prompt, user_prompt)
+    if result is not None:
+        return result
+
+    return _call_ollama(system_prompt, user_prompt)

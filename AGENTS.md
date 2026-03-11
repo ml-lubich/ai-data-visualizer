@@ -15,9 +15,11 @@ Two services run during development:
 | Service | Command | Port | Notes |
 |---------|---------|------|-------|
 | Vite dev server (frontend) | `npm run dev` | 5173 | HMR; serves `index.html` at project root |
-| Flask API (backend) | `python3 server/app.py` | 5001 | Proxies to OpenRouter API; requires `OPENROUTER_API_KEY` env var |
+| Flask API (backend) | `python3 server/app.py` | 5001 | LLM proxy: OpenRouter or local Ollama |
+| Ollama (local LLM) | `ollama serve` | 11434 | Local fallback; model: `qwen2.5-coder:3b` |
 
-Start both with: `npm run start` (uses `concurrently`).
+Start frontend + backend: `npm run start` (uses `concurrently`).
+Start Ollama separately: `ollama serve` (pulls model on first use: `ollama pull qwen2.5-coder:3b`).
 
 ### Common commands
 

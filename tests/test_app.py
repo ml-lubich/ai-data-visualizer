@@ -29,7 +29,8 @@ def test_health_endpoint(client):
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["status"] == "ok"
-    assert "llm_configured" in data
+    assert "openrouter_configured" in data
+    assert "ollama_available" in data
 
 
 def test_visualize_requires_json(client):
