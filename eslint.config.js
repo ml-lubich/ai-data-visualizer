@@ -13,6 +13,7 @@ export default [
         HTMLCanvasElement: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        requestAnimationFrame: "readonly",
         fetch: "readonly",
         Plotly: "readonly",
         Function: "readonly",
