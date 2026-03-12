@@ -15,16 +15,17 @@ describe("executeChartCode", () => {
     expect(window.__chartData).toEqual(testData);
   });
 
-  it("returns success:true for valid code", () => {
-    const result = executeChartCode("const x = 1;", []);
+  it("returns success:true when code produces visible content", () => {
+    const code = 'document.getElementById("visualization-target").innerHTML = "<div>chart</div>";';
+    const result = executeChartCode(code, []);
     expect(result.success).toBe(true);
     expect(result.error).toBeNull();
   });
 
-  it("returns success:false with error message for invalid code", () => {
+  it("returns success:false with error detail for throwing code", () => {
     const result = executeChartCode("throw new Error('test failure');", []);
     expect(result.success).toBe(false);
-    expect(result.error).toBe("test failure");
+    expect(result.error).toContain("test failure");
   });
 
   it("clears the target element before execution", () => {
@@ -32,5 +33,11 @@ describe("executeChartCode", () => {
     target.innerHTML = "<p>old content</p>";
     executeChartCode("", []);
     expect(target.innerHTML).toBe("");
+  });
+
+  it("detects when code produces no visible output", () => {
+    const result = executeChartCode("const x = 1;", []);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("no visible chart");
   });
 });

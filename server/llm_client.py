@@ -4,11 +4,8 @@ AIGIS Platform Team
 Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
-Multi-shot LLM pipeline for chart code generation.
-Shot 1: Generate from scratch.
-Shot 2: If syntax/validation error, re-prompt with the error.
-Shot 3: If runtime error from browser, re-prompt with the error.
-No templates -- the LLM codes everything.
+Hardened multi-shot LLM pipeline for chart code generation.
+Multiple layers of defense: extraction -> sanitization -> validation -> retry.
 """
 
 import re
@@ -21,27 +18,44 @@ from server.config import (
     OLLAMA_URL, OLLAMA_MODEL,
 )
 from server.prompt_templates import build_prompt, build_fix_prompt
-from server.code_validator import validate_code
+from server.code_validator import sanitize_and_validate
 
 logger = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MAX_RETRIES = 3
 
-_JS_CODE_FENCE = re.compile(r"```(?:javascript|js)\s*\n(.*?)```", re.DOTALL)
+_JS_FENCE_PATTERNS = [
+    re.compile(r"```(?:javascript|js)\s*\n(.*?)```", re.DOTALL),
+    re.compile(r"```\s*\n(.*?)```", re.DOTALL),
+    re.compile(r"```(.*?)```", re.DOTALL),
+]
 
 
 def _extract_js_code(response_text: str) -> str:
-    """Extract JavaScript code from a markdown code fence."""
-    match = _JS_CODE_FENCE.search(response_text)
-    if match:
-        return match.group(1).strip()
-    return response_text.strip()
+    """
+    Extract JavaScript code from the LLM response.
+    Tries multiple fence patterns, then falls back to raw text.
+    """
+    for pattern in _JS_FENCE_PATTERNS:
+        match = pattern.search(response_text)
+        if match:
+            code = match.group(1).strip()
+            if len(code) > 20:
+                return code
+
+    stripped = response_text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.split("\n")
+        lines = [l for l in lines if not l.strip().startswith("```")]
+        return "\n".join(lines).strip()
+
+    return stripped
 
 
 def _call_llm(messages: list[dict]) -> dict:
     """
-    Call the LLM with a message list. Tries OpenRouter, falls back to Ollama.
+    Call the LLM. Tries OpenRouter first, falls back to Ollama.
     Returns {"raw_text": str, "model": str, "error": str|None}.
     """
     result = _try_openrouter(messages)
@@ -91,7 +105,7 @@ def _try_ollama(messages: list[dict]) -> dict:
                 "model": OLLAMA_MODEL,
                 "messages": messages,
                 "stream": False,
-                "options": {"num_predict": LLM_MAX_TOKENS, "temperature": 0.2},
+                "options": {"num_predict": LLM_MAX_TOKENS, "temperature": 0.1},
             },
             timeout=180,
         )
@@ -112,9 +126,12 @@ def _try_ollama(messages: list[dict]) -> dict:
 def generate_chart_code(question: str, columns: list[str], row_count: int,
                         sample_rows: list[dict]) -> dict:
     """
-    Multi-shot LLM pipeline:
-      Shot 1: Generate code from question + data schema.
-      Shot 2+: If validation fails, feed the error back and ask the LLM to fix.
+    Hardened multi-shot pipeline:
+      1. Generate code from question + data schema
+      2. Extract code from response (multiple fence patterns)
+      3. Sanitize (strip imports, console.log, etc.)
+      4. Validate (syntax + structure)
+      5. If invalid, feed error back to LLM and repeat
     Returns { code, model, error, attempts }.
     """
     system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
@@ -126,6 +143,7 @@ def generate_chart_code(question: str, columns: list[str], row_count: int,
 
     last_error = None
     model_used = "unknown"
+    code = ""
 
     for attempt in range(1, MAX_RETRIES + 1):
         logger.info("LLM attempt %d/%d for: %s", attempt, MAX_RETRIES, question[:60])
@@ -137,24 +155,23 @@ def generate_chart_code(question: str, columns: list[str], row_count: int,
             return {"code": "", "model": model_used, "error": llm_result["error"],
                     "attempts": attempt}
 
-        code = _extract_js_code(llm_result["raw_text"])
-        is_valid, validation_error = validate_code(code)
+        raw_code = _extract_js_code(llm_result["raw_text"])
+        code, is_valid, validation_error = sanitize_and_validate(raw_code)
 
         if is_valid:
-            logger.info("Attempt %d: code valid (%d chars)", attempt, len(code))
-            return {"code": code, "model": model_used, "error": None,
-                    "attempts": attempt}
+            logger.info("Attempt %d: valid (%d chars, model: %s)", attempt, len(code), model_used)
+            return {"code": code, "model": model_used, "error": None, "attempts": attempt}
 
-        logger.warning("Attempt %d validation failed: %s", attempt, validation_error)
+        logger.warning("Attempt %d failed: %s", attempt, validation_error)
         last_error = validation_error
 
         if attempt < MAX_RETRIES:
-            fix_prompt = build_fix_prompt(code, validation_error)
+            fix_prompt = build_fix_prompt(raw_code, validation_error)
             messages.append({"role": "assistant", "content": llm_result["raw_text"]})
             messages.append({"role": "user", "content": fix_prompt})
 
     return {"code": code, "model": model_used,
-            "error": f"Validation failed after {MAX_RETRIES} attempts: {last_error}",
+            "error": f"Failed after {MAX_RETRIES} attempts: {last_error}",
             "attempts": MAX_RETRIES}
 
 
@@ -162,11 +179,10 @@ def retry_with_error(question: str, columns: list[str], row_count: int,
                      sample_rows: list[dict], failed_code: str,
                      runtime_error: str) -> dict:
     """
-    Shot 3: The browser tried to execute the code and got a runtime error.
-    Feed the error back to the LLM and ask it to fix.
+    Browser runtime error retry: feed the error + failed code back to the LLM.
     """
     system_prompt, user_prompt = build_prompt(question, columns, row_count, sample_rows)
-    fix_prompt = build_fix_prompt(failed_code, f"Runtime error: {runtime_error}")
+    fix_prompt = build_fix_prompt(failed_code, f"Runtime error in browser: {runtime_error}")
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -181,11 +197,11 @@ def retry_with_error(question: str, columns: list[str], row_count: int,
         return {"code": "", "model": llm_result["model"], "error": llm_result["error"],
                 "attempts": 1}
 
-    code = _extract_js_code(llm_result["raw_text"])
-    is_valid, validation_error = validate_code(code)
+    raw_code = _extract_js_code(llm_result["raw_text"])
+    code, is_valid, validation_error = sanitize_and_validate(raw_code)
 
     if not is_valid:
         return {"code": code, "model": llm_result["model"],
-                "error": f"Fix attempt still invalid: {validation_error}", "attempts": 1}
+                "error": f"Fix still invalid: {validation_error}", "attempts": 1}
 
     return {"code": code, "model": llm_result["model"], "error": None, "attempts": 1}

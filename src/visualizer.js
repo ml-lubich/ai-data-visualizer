@@ -4,17 +4,18 @@
  * Copyright 2025, Polaris Wireless Inc
  * Proprietary and Confidential
  *
- * Executes LLM-generated Plotly.js code and forces charts to fit the container.
+ * Hardened execution of LLM-generated Plotly.js code.
+ * Forces charts to fit containers. Captures detailed error context.
  */
 
 const TARGET_ID = "visualization-target";
 
 /**
  * Execute generated Plotly.js JavaScript code.
- * After execution, force-resizes all Plotly charts to fit the container.
+ * Wraps execution with detailed error capture for retry pipeline.
  * @param {string} code - JavaScript code string to execute.
  * @param {object[]} data - Full parsed dataset.
- * @returns {{ success: boolean, error: string|null }}
+ * @returns {{ success: boolean, error: string|null, code: string }}
  */
 export function executeChartCode(code, data) {
   window.__chartData = data;
@@ -28,19 +29,33 @@ export function executeChartCode(code, data) {
     const fn = new Function(code);
     fn();
 
+    const hasPlotly = target && target.querySelector(".js-plotly-plot");
+    const hasTable = target && target.querySelector(".cell-text-content, table");
+    const hasContent = target && target.children.length > 0;
+
+    if (!hasPlotly && !hasTable && !hasContent) {
+      return {
+        success: false,
+        error: "Code executed without error but produced no visible chart. Ensure Plotly.newPlot('visualization-target', ...) is called.",
+        code,
+      };
+    }
+
     requestAnimationFrame(() => {
       fitChartsToContainer();
     });
 
-    return { success: true, error: null };
+    return { success: true, error: null, code };
   } catch (err) {
-    return { success: false, error: err.message };
+    const errorDetail = err.stack
+      ? `${err.message} (at ${err.stack.split("\n")[1]?.trim() || "unknown location"})`
+      : err.message;
+    return { success: false, error: errorDetail, code };
   }
 }
 
 /**
- * Force every Plotly chart inside the target to match the container's actual pixel size.
- * This overrides any fixed width/height the LLM may have set.
+ * Force every Plotly chart inside the target to match the container size.
  */
 function fitChartsToContainer() {
   const target = document.getElementById(TARGET_ID);
@@ -55,8 +70,12 @@ function fitChartsToContainer() {
 
   const plots = target.querySelectorAll(".js-plotly-plot");
   for (const plot of plots) {
-    Plotly.relayout(plot, { width: w, height: h, autosize: false });
-    Plotly.Plots.resize(plot);
+    try {
+      Plotly.relayout(plot, { width: w, height: h, autosize: false });
+      Plotly.Plots.resize(plot);
+    } catch (_e) {
+      /* resize failure is non-critical */
+    }
   }
 }
 
