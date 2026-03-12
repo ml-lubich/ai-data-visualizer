@@ -18,7 +18,7 @@ LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "4096"))
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:1.5b")
 
 SERVER_PORT = int(os.getenv("SERVER_PORT", "5001"))
 SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")

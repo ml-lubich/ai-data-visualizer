@@ -11,7 +11,7 @@ const API_BASE = "http://localhost:5001";
 
 /**
  * Check backend health.
- * @returns {Promise<{status: string, llm_configured: boolean}>}
+ * @returns {Promise<object>}
  */
 export async function checkHealth() {
   const res = await fetch(`${API_BASE}/api/health`);
@@ -22,12 +22,12 @@ export async function checkHealth() {
 }
 
 /**
- * Request chart code generation from the backend.
- * @param {string} question - Natural language visualization request.
- * @param {string[]} columns - Column names from the dataset.
- * @param {number} rowCount - Total number of rows.
- * @param {object[]} sampleRows - First N rows of data.
- * @returns {Promise<{code: string, model: string, error: string|null}>}
+ * Request chart code generation (shot 1-2: generate + auto-validate).
+ * @param {string} question
+ * @param {string[]} columns
+ * @param {number} rowCount
+ * @param {object[]} sampleRows
+ * @returns {Promise<{code: string, model: string, error: string|null, attempts: number}>}
  */
 export async function requestVisualization(question, columns, rowCount, sampleRows) {
   const res = await fetch(`${API_BASE}/api/visualize`, {
@@ -42,10 +42,40 @@ export async function requestVisualization(question, columns, rowCount, sampleRo
   });
 
   const data = await res.json();
-
   if (!res.ok) {
     throw new Error(data.error || `API error: ${res.status}`);
   }
+  return data;
+}
 
+/**
+ * Shot 3: Send runtime error back to LLM for a fix attempt.
+ * @param {string} question
+ * @param {string[]} columns
+ * @param {number} rowCount
+ * @param {object[]} sampleRows
+ * @param {string} failedCode
+ * @param {string} runtimeError
+ * @returns {Promise<{code: string, model: string, error: string|null, attempts: number}>}
+ */
+export async function requestRetry(question, columns, rowCount, sampleRows,
+                                    failedCode, runtimeError) {
+  const res = await fetch(`${API_BASE}/api/visualize/retry`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      question,
+      columns,
+      row_count: rowCount,
+      sample_rows: sampleRows,
+      failed_code: failedCode,
+      runtime_error: runtimeError,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || `Retry API error: ${res.status}`);
+  }
   return data;
 }

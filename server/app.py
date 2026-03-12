@@ -5,7 +5,7 @@ Copyright 2025, Polaris Wireless Inc
 Proprietary and Confidential
 
 Flask backend for ai-data-visualizer.
-Provides /api/visualize endpoint -- every chart is coded from scratch by the LLM.
+Multi-shot LLM pipeline: generate -> validate -> retry on error.
 """
 
 import logging
@@ -23,7 +23,7 @@ from server.config import (
     SERVER_PORT, SERVER_HOST, CORS_ORIGINS,
     OPENROUTER_API_KEY, LLM_MODEL, OLLAMA_URL, OLLAMA_MODEL,
 )
-from server.llm_client import generate_chart_code
+from server.llm_client import generate_chart_code, retry_with_error
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -56,11 +56,8 @@ def health():
 @app.route("/api/visualize", methods=["POST"])
 def visualize():
     """
-    Generate Plotly.js chart code from a natural language question.
-    The LLM codes everything from scratch -- no templates.
-
-    Expects JSON: { "question": str, "columns": [str], "row_count": int, "sample_rows": [dict] }
-    Returns JSON: { "code": str, "model": str, "error": str|null }
+    Multi-shot chart generation: generate -> syntax check -> auto-retry.
+    Returns { code, model, error, attempts }.
     """
     body = request.get_json(silent=True)
     if not body:
@@ -80,6 +77,37 @@ def visualize():
     logger.info("Visualize request: question=%r columns=%s rows=%d", question, columns, row_count)
 
     result = generate_chart_code(question, columns, row_count, sample_rows)
+
+    if result["error"]:
+        return jsonify(result), 502
+
+    return jsonify(result)
+
+
+@app.route("/api/visualize/retry", methods=["POST"])
+def visualize_retry():
+    """
+    Shot 3: frontend execution failed, feed the runtime error back to the LLM.
+    Expects { question, columns, row_count, sample_rows, failed_code, runtime_error }.
+    """
+    body = request.get_json(silent=True)
+    if not body:
+        return jsonify({"error": "Request body must be JSON"}), 400
+
+    question = body.get("question", "").strip()
+    columns = body.get("columns", [])
+    row_count = body.get("row_count", 0)
+    sample_rows = body.get("sample_rows", [])
+    failed_code = body.get("failed_code", "")
+    runtime_error = body.get("runtime_error", "")
+
+    if not question or not columns or not failed_code or not runtime_error:
+        return jsonify({"error": "question, columns, failed_code, and runtime_error are required"}), 400
+
+    logger.info("Retry request: error=%r question=%r", runtime_error[:80], question[:60])
+
+    result = retry_with_error(question, columns, row_count, sample_rows,
+                              failed_code, runtime_error)
 
     if result["error"]:
         return jsonify(result), 502

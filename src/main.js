@@ -4,13 +4,16 @@
  * Copyright 2025, Polaris Wireless Inc
  * Proprietary and Confidential
  *
- * Application entry point: wires together data upload, chat, and visualization.
+ * Application entry point: multi-shot LLM pipeline.
+ * Generate -> validate (backend) -> execute -> retry on runtime error.
  */
 
 import { parseCSV } from "./data-parser.js";
 import { addMessage, showLoading, removeLoading } from "./chat.js";
-import { requestVisualization, checkHealth } from "./api-client.js";
+import { requestVisualization, requestRetry, checkHealth } from "./api-client.js";
 import { executeChartCode } from "./visualizer.js";
+
+const MAX_RUNTIME_RETRIES = 2;
 
 let currentData = null;
 
@@ -79,12 +82,64 @@ chatForm.addEventListener("submit", async (event) => {
       return;
     }
 
-    const exec = executeChartCode(result.code, currentData.rows);
+    const attemptsNote = result.attempts > 1
+      ? ` (${result.attempts} attempts, auto-fixed syntax)`
+      : "";
+
+    let exec = executeChartCode(result.code, currentData.rows);
 
     if (exec.success) {
-      addMessage(`Chart generated using ${result.model}.`, "assistant");
-    } else {
-      addMessage(`Code execution failed: ${exec.error}`, "error");
+      addMessage(`Chart generated using ${result.model}.${attemptsNote}`, "assistant");
+      enableChat();
+      chatInput.focus();
+      return;
+    }
+
+    let lastCode = result.code;
+    let lastError = exec.error;
+
+    for (let retry = 1; retry <= MAX_RUNTIME_RETRIES; retry++) {
+      addMessage(`Runtime error: ${lastError}. Auto-retrying (${retry}/${MAX_RUNTIME_RETRIES})...`, "system");
+      const retryLoading = showLoading();
+
+      try {
+        const retryResult = await requestRetry(
+          question,
+          currentData.columns,
+          currentData.rowCount,
+          currentData.sampleRows,
+          lastCode,
+          lastError
+        );
+
+        removeLoading(retryLoading);
+
+        if (retryResult.error) {
+          addMessage(`Retry failed: ${retryResult.error}`, "error");
+          break;
+        }
+
+        exec = executeChartCode(retryResult.code, currentData.rows);
+
+        if (exec.success) {
+          addMessage(
+            `Chart generated using ${retryResult.model} (fixed after runtime error).`,
+            "assistant"
+          );
+          break;
+        }
+
+        lastCode = retryResult.code;
+        lastError = exec.error;
+      } catch (retryErr) {
+        removeLoading(retryLoading);
+        addMessage(`Retry request failed: ${retryErr.message}`, "error");
+        break;
+      }
+    }
+
+    if (!exec.success) {
+      addMessage(`Could not render chart after retries: ${lastError}`, "error");
     }
   } catch (err) {
     removeLoading(loadingEl);

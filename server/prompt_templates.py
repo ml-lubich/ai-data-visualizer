@@ -29,6 +29,7 @@ Rules:
 - Add descriptive hovertemplate strings with formatted values.
 - Always add a descriptive title to the layout.
 - Set `{ responsive: true }` in config.
+- Do NOT set fixed pixel width/height. The chart should fill its container.
 - If the request is ambiguous, make a reasonable default choice and proceed.
 """
 
@@ -41,6 +42,20 @@ Row count: {row_count}
 
 ## User Request
 {question}
+"""
+
+FIX_PROMPT_TEMPLATE = """The code you generated has an error:
+
+```
+{error}
+```
+
+Here is the problematic code:
+```javascript
+{code}
+```
+
+Please fix the code and output a corrected version. Output ONLY the fixed ```javascript code fence.
 """
 
 
@@ -62,3 +77,8 @@ def build_prompt(question: str, columns: list[str], row_count: int,
     )
 
     return SYSTEM_PROMPT, user_prompt
+
+
+def build_fix_prompt(code: str, error: str) -> str:
+    """Build the fix prompt for multi-shot retry."""
+    return FIX_PROMPT_TEMPLATE.format(code=code, error=error)

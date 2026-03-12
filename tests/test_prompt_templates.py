@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from server.prompt_templates import build_prompt
+from server.prompt_templates import build_prompt, build_fix_prompt
 
 
 def test_build_prompt_returns_two_strings():
@@ -67,3 +67,10 @@ def test_system_prompt_mentions_plotly():
     )
     assert "Plotly" in system
     assert "Plotly.newPlot" in system
+
+
+def test_fix_prompt_includes_error_and_code():
+    fix = build_fix_prompt("const x = ;", "Unexpected token ;")
+    assert "Unexpected token ;" in fix
+    assert "const x = ;" in fix
+    assert "fix" in fix.lower()

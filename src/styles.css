@@ -93,9 +93,19 @@ main {
   flex: 1;
   background: #1e293b;
   border-radius: 0.75rem;
-  padding: 1.5rem;
-  min-height: 400px;
+  padding: 1rem;
+  min-height: 500px;
   overflow: auto;
+}
+
+.viz-canvas .js-plotly-plot,
+.viz-canvas .plotly {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.viz-canvas .js-plotly-plot .plot-container {
+  width: 100% !important;
 }
 
 .viz-canvas .placeholder {
