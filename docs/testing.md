@@ -36,6 +36,17 @@ and benchmark evaluation (10 curated questions).
   3. GPT 120B OSS
 - **Run**: `python tests/evaluate.py --model claude`
 
+## Code Validation and Retry
+
+Generated Plotly.js code is validated and retried on failure:
+
+1. **Backend syntax check**: Before returning, the backend validates JS syntax via
+   `scripts/validate-js-syntax.js` (Node). Invalid syntax triggers up to 3 LLM retries
+   with the error message fed back into the prompt.
+2. **Frontend execution retry**: When `executeChartCode` throws (syntax or runtime),
+   the client calls the API again with `previous_code` and `previous_error`, up to 3
+   attempts total. The LLM receives the error and previous code to produce a fix.
+
 ## Benchmark Questions (Draft - Align with Rodrigo)
 
 See `tests/benchmark_questions.json` for the current set.

@@ -30,6 +30,17 @@ export function executeChartCode(code, data) {
   try {
     const fn = new Function(code);
     fn();
+
+    /* Force Plotly to resize to container after render (prevents cut-off) */
+    if (typeof Plotly !== "undefined") {
+      const el = document.getElementById(TARGET_ID);
+      if (el?.querySelector(".plotly")) {
+        requestAnimationFrame(() => {
+          Plotly.Plots.resize(TARGET_ID);
+        });
+      }
+    }
+
     return { success: true, error: null };
   } catch (err) {
     return { success: false, error: err.message };

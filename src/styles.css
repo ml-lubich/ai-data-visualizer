@@ -52,6 +52,7 @@ main {
   flex-direction: column;
   padding: 1rem;
   overflow: auto;
+  min-height: 0;
 }
 
 .viz-toolbar {
@@ -91,10 +92,11 @@ main {
 
 .viz-canvas {
   flex: 1;
+  min-height: 400px;
+  width: 100%;
   background: #1e293b;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  min-height: 400px;
   overflow: auto;
 }
 

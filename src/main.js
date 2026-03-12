@@ -7,10 +7,11 @@
  * Application entry point: wires together data upload, chat, and visualization.
  */
 
-import { parseCSV } from "./data-parser.js";
-import { addMessage, showLoading, removeLoading } from "./chat.js";
+import { parseCSV, parseCSVString } from "./data-parser.js";
+import { addMessage, showLoading, removeLoading, updateLoadingText } from "./chat.js";
 import { requestVisualization, checkHealth } from "./api-client.js";
 import { executeChartCode } from "./visualizer.js";
+import { CANONICAL_EXAMPLES } from "./examples/canonical-examples.js";
 
 let currentData = null;
 
@@ -61,31 +62,55 @@ chatForm.addEventListener("submit", async (event) => {
   chatInput.value = "";
   disableChat();
 
-  const loadingEl = showLoading();
+  const loadingEl = showLoading("Generating visualization...");
+  const MAX_ATTEMPTS = 3;
 
   try {
-    const result = await requestVisualization(
-      question,
-      currentData.columns,
-      currentData.rowCount,
-      currentData.sampleRows
-    );
+    let result;
+    let attempt = 0;
+    let lastCode = null;
+    let lastError = null;
+
+    while (attempt < MAX_ATTEMPTS) {
+      attempt++;
+      result = await requestVisualization(
+        question,
+        currentData.columns,
+        currentData.rowCount,
+        currentData.sampleRows,
+        lastCode != null ? { previousCode: lastCode, previousError: lastError } : {}
+      );
+
+      if (result.error) {
+        addMessage(`Error: ${result.error}`, "error");
+        break;
+      }
+
+      const exec = executeChartCode(result.code, currentData.rows);
+
+      if (exec.success) {
+        addMessage(`Chart generated using ${result.model}.`, "assistant");
+        break;
+      }
+
+      lastCode = result.code;
+      lastError = exec.error;
+      if (attempt < MAX_ATTEMPTS) {
+        updateLoadingText(loadingEl, `Retrying (attempt ${attempt + 1}/${MAX_ATTEMPTS})...`);
+        addMessage(`Fixing that...`, "system");
+      } else {
+        addMessage(`Couldn't generate that chart. Showing a fallback instead.`, "system");
+        const fallback = CANONICAL_EXAMPLES[0];
+        const fallbackExec = executeChartCode(fallback.code, currentData.rows);
+        if (fallbackExec.success) {
+          addMessage(`Here's a bar chart of revenue by region as a fallback.`, "assistant");
+        } else {
+          addMessage(`Code execution failed: ${exec.error}`, "error");
+        }
+      }
+    }
 
     removeLoading(loadingEl);
-
-    if (result.error) {
-      addMessage(`Error: ${result.error}`, "error");
-      enableChat();
-      return;
-    }
-
-    const exec = executeChartCode(result.code, currentData.rows);
-
-    if (exec.success) {
-      addMessage(`Chart generated using ${result.model}.`, "assistant");
-    } else {
-      addMessage(`Code execution failed: ${exec.error}`, "error");
-    }
   } catch (err) {
     removeLoading(loadingEl);
     addMessage(`Request failed: ${err.message}`, "error");
@@ -96,7 +121,24 @@ chatForm.addEventListener("submit", async (event) => {
 });
 
 async function init() {
-  addMessage("Welcome! Upload a CSV file to get started.", "system");
+  addMessage("Welcome! Loading sample data for the demo...", "system");
+
+  try {
+    const csvRes = await fetch("/sample_data/sales.csv");
+    if (csvRes.ok) {
+      const csvText = await csvRes.text();
+      currentData = parseCSVString(csvText);
+      uploadLabel.textContent = "sales.csv (sample)";
+      dataStatus.textContent = `${currentData.rowCount} rows, ${currentData.columns.length} columns`;
+      dataStatus.classList.add("loaded");
+      enableChat();
+      addMessage("Sample data loaded. Try: \"Show me a bar chart of revenue by region\"", "system");
+    } else {
+      addMessage("Upload a CSV file to get started.", "system");
+    }
+  } catch (_e) {
+    addMessage("Upload a CSV file to get started.", "system");
+  }
 
   try {
     const health = await checkHealth();

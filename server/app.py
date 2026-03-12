@@ -59,7 +59,8 @@ def visualize():
     Generate Plotly.js chart code from a natural language question.
     The LLM codes everything from scratch -- no templates.
 
-    Expects JSON: { "question": str, "columns": [str], "row_count": int, "sample_rows": [dict] }
+    Expects JSON: { "question": str, "columns": [str], "row_count": int, "sample_rows": [dict],
+                    "previous_code": str?, "previous_error": str? }  (for retry on execution failure)
     Returns JSON: { "code": str, "model": str, "error": str|null }
     """
     body = request.get_json(silent=True)
@@ -73,13 +74,19 @@ def visualize():
     columns = body.get("columns", [])
     row_count = body.get("row_count", 0)
     sample_rows = body.get("sample_rows", [])
+    previous_code = body.get("previous_code")
+    previous_error = body.get("previous_error")
 
     if not columns:
         return jsonify({"error": "columns is required (list of column names)"}), 400
 
-    logger.info("Visualize request: question=%r columns=%s rows=%d", question, columns, row_count)
+    logger.info("Visualize request: question=%r columns=%s rows=%d retry=%s",
+                question, columns, row_count, bool(previous_code))
 
-    result = generate_chart_code(question, columns, row_count, sample_rows)
+    result = generate_chart_code(
+        question, columns, row_count, sample_rows,
+        previous_code=previous_code, previous_error=previous_error,
+    )
 
     if result["error"]:
         return jsonify(result), 502

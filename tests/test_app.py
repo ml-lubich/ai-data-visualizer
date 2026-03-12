@@ -72,6 +72,30 @@ def test_visualize_returns_code(mock_generate, client):
 
 
 @patch("server.app.generate_chart_code")
+def test_visualize_passes_retry_params(mock_generate, client):
+    """When previous_code and previous_error are sent, they are passed to generate_chart_code."""
+    mock_generate.return_value = {
+        "code": "Plotly.newPlot('x', []);",
+        "model": "test",
+        "error": None,
+    }
+    resp = client.post("/api/visualize", json={
+        "question": "bar chart",
+        "columns": ["a"],
+        "row_count": 1,
+        "sample_rows": [],
+        "previous_code": "bad code",
+        "previous_error": "SyntaxError: unexpected token",
+    })
+    assert resp.status_code == 200
+    mock_generate.assert_called_once_with(
+        "bar chart", ["a"], 1, [],
+        previous_code="bad code",
+        previous_error="SyntaxError: unexpected token",
+    )
+
+
+@patch("server.app.generate_chart_code")
 def test_visualize_returns_502_on_llm_error(mock_generate, client):
     mock_generate.return_value = {
         "code": "",

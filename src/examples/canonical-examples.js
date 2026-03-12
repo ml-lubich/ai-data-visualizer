@@ -31,9 +31,10 @@ Plotly.newPlot("visualization-target", [{
   hovertemplate: "<b>%{x}</b><br>Revenue: $%{y:,.2f}<extra></extra>",
 }], {
   title: "Total Revenue by Region",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Region" }, yaxis: { title: "Revenue ($)" },
+  xaxis: { title: "Region", automargin: true }, yaxis: { title: "Revenue ($)", automargin: true },
 }, { responsive: true });
 `,
   },
@@ -65,6 +66,7 @@ Plotly.newPlot("visualization-target", [{
   },
 }], {
   title: "Sales Data Table (24 rows)",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
   margin: { t: 40, l: 10, r: 10, b: 10 },
@@ -94,10 +96,11 @@ Plotly.newPlot("visualization-target", [{
   hovertemplate: "<b>%{x}</b><br>Revenue: $%{y:,.2f}<extra></extra>",
 }], {
   title: "Monthly Revenue Trend",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
+  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
 }, { responsive: true });
 `,
   },
@@ -126,10 +129,11 @@ const traces = products.map(prod => {
 
 Plotly.newPlot("visualization-target", traces, {
   title: "Units Sold vs Revenue (by Product)",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
+  xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
   dragmode: "lasso",
 }, { responsive: true });
@@ -159,6 +163,7 @@ Plotly.newPlot("visualization-target", [{
   pull: [0.03, 0.03, 0.03],
 }], {
   title: "Revenue Share by Product",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
   showlegend: true,
@@ -191,11 +196,12 @@ const traces = products.map(prod => {
 
 Plotly.newPlot("visualization-target", traces, {
   title: "Monthly Revenue by Product (Stacked)",
+  autosize: true,
   barmode: "stack",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
+  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
 }, { responsive: true });
 `,
@@ -216,10 +222,11 @@ Plotly.newPlot("visualization-target", [{
   hovertemplate: "Range: %{x}<br>Count: %{y}<extra></extra>",
 }], {
   title: "Distribution of Sale Revenue Amounts",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "Count", gridcolor: "rgba(148,163,184,0.15)" },
+  xaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "Count", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
   bargap: 0.05,
 }, { responsive: true });
 `,
@@ -250,10 +257,11 @@ const traces = products.map(prod => {
 
 Plotly.newPlot("visualization-target", traces, {
   title: "Monthly Revenue per Product (Click Legend to Toggle)",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
+  xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
   hovermode: "x unified",
 }, { responsive: true });
@@ -281,10 +289,11 @@ Plotly.newPlot("visualization-target", [{
   hovertemplate: "<b>%{y}</b><br>Units Sold: %{x:,}<extra></extra>",
 }], {
   title: "Regions by Total Units Sold (Sorted)",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)" },
-  yaxis: { title: "" },
+  xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
+  yaxis: { title: "", automargin: true },
   margin: { l: 80 },
 }, { responsive: true });
 `,
@@ -319,9 +328,10 @@ Plotly.newPlot("viz-chart", [{
   hovertemplate: "<b>%{x}</b><br>Profit: $%{y:,.2f}<br>Margin: %{text}<extra></extra>",
 }], {
   title: "Total Profit by Product",
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
   font: { color: "#e2e8f0" },
-  yaxis: { title: "Profit ($)", gridcolor: "rgba(148,163,184,0.15)" },
+  yaxis: { title: "Profit ($)", gridcolor: "rgba(148,163,184,0.15)", automargin: true },
   margin: { t: 50, b: 30 }, height: 300,
 }, { responsive: true });
 
@@ -345,6 +355,7 @@ Plotly.newPlot("viz-table", [{
     font: { color: "#cbd5e1", size: 12 }, align: ["left","right","right","right","right","right","right"], height: 28,
   },
 }], {
+  autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)", font: { color: "#e2e8f0" },
   margin: { t: 5, l: 10, r: 10, b: 5 }, height: 160,
 }, { responsive: true });

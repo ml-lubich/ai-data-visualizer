@@ -29,6 +29,8 @@ Rules:
 - Add descriptive hovertemplate strings with formatted values.
 - Always add a descriptive title to the layout.
 - Set `{ responsive: true }` in config.
+- Set `autosize: true` in layout so the chart fills its container and is never cut off.
+- Set `automargin: true` on xaxis and yaxis to prevent labels and titles from being clipped.
 - If the request is ambiguous, make a reasonable default choice and proceed.
 """
 
@@ -41,6 +43,29 @@ Row count: {row_count}
 
 ## User Request
 {question}
+"""
+
+USER_RETRY_PROMPT_TEMPLATE = """## Dataset Schema
+Columns: {columns}
+Row count: {row_count}
+
+### Sample rows (first 5):
+{sample_rows}
+
+## User Request
+{question}
+
+## Previous Attempt Failed
+Your previous code threw an error when executed in the browser. Fix it and output corrected code only.
+
+**Error:** {previous_error}
+
+**Previous code:**
+```javascript
+{previous_code}
+```
+
+Output ONLY a single ```javascript code fence with the corrected code. No explanation outside the fence.
 """
 
 
@@ -59,6 +84,29 @@ def build_prompt(question: str, columns: list[str], row_count: int,
         row_count=row_count,
         sample_rows=rows_str.strip(),
         question=question,
+    )
+
+    return SYSTEM_PROMPT, user_prompt
+
+
+def build_retry_prompt(question: str, columns: list[str], row_count: int,
+                      sample_rows: list[dict], previous_code: str,
+                      previous_error: str) -> tuple[str, str]:
+    """Build prompts for retry when previous code failed at runtime."""
+    columns_str = ", ".join(columns)
+
+    rows_str = ""
+    for row in sample_rows[:5]:
+        row_parts = [f"  {k}: {v}" for k, v in row.items()]
+        rows_str += "- " + " | ".join(row_parts) + "\n"
+
+    user_prompt = USER_RETRY_PROMPT_TEMPLATE.format(
+        columns=columns_str,
+        row_count=row_count,
+        sample_rows=rows_str.strip(),
+        question=question,
+        previous_error=previous_error,
+        previous_code=previous_code,
     )
 
     return SYSTEM_PROMPT, user_prompt

@@ -18,6 +18,30 @@ import Papa from "papaparse";
  */
 
 /**
+ * Parse a CSV string (e.g. from fetch or import).
+ * @param {string} csvString
+ * @returns {ParsedData}
+ */
+export function parseCSVString(csvString) {
+  const results = Papa.parse(csvString, {
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: true,
+  });
+  if (results.errors.length > 0) {
+    throw new Error(`CSV parse error: ${results.errors[0].message}`);
+  }
+  const columns = results.meta.fields || [];
+  const rows = results.data;
+  return {
+    columns,
+    rows,
+    rowCount: rows.length,
+    sampleRows: rows.slice(0, 5),
+  };
+}
+
+/**
  * Parse a CSV File object.
  * @param {File} file
  * @returns {Promise<ParsedData>}

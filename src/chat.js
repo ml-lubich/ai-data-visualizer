@@ -26,15 +26,25 @@ export function addMessage(text, role) {
 
 /**
  * Show a loading indicator in the chat.
+ * @param {string} [text="Generating visualization..."] - Initial loading text.
  * @returns {HTMLElement} The loading element (remove it when done).
  */
-export function showLoading() {
+export function showLoading(text = "Generating visualization...") {
   const el = document.createElement("div");
   el.classList.add("chat-msg", "assistant", "loading-dots");
-  el.textContent = "Generating visualization";
+  el.textContent = text;
   messagesContainer.appendChild(el);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
   return el;
+}
+
+/**
+ * Update the text of a loading element (e.g. for retry feedback).
+ * @param {HTMLElement} el - Loading element from showLoading.
+ * @param {string} text - New text.
+ */
+export function updateLoadingText(el, text) {
+  if (el) el.textContent = text;
 }
 
 /**

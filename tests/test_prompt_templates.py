@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from server.prompt_templates import build_prompt
+from server.prompt_templates import build_prompt, build_retry_prompt
 
 
 def test_build_prompt_returns_two_strings():
@@ -67,3 +67,30 @@ def test_system_prompt_mentions_plotly():
     )
     assert "Plotly" in system
     assert "Plotly.newPlot" in system
+
+
+def test_system_prompt_requires_autosize_and_automargin():
+    """Ensure charts fill container and are never cut off."""
+    system, _ = build_prompt(
+        question="test",
+        columns=["a"],
+        row_count=1,
+        sample_rows=[],
+    )
+    assert "autosize: true" in system
+    assert "automargin: true" in system
+
+
+def test_build_retry_prompt_includes_error_and_previous_code():
+    """Retry prompt must include previous error and code for LLM feedback."""
+    system, user = build_retry_prompt(
+        question="bar chart",
+        columns=["x", "y"],
+        row_count=5,
+        sample_rows=[{"x": 1, "y": 2}],
+        previous_code="Plotly.newPlot('x', []);",
+        previous_error="Plotly is not defined",
+    )
+    assert "Plotly is not defined" in user
+    assert "Plotly.newPlot('x', []);" in user
+    assert "bar chart" in user
