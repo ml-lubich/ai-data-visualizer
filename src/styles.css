@@ -1,3 +1,30 @@
+/*
+ * AI Data Visualizer - AIGIS Platform
+ * Polaris Wireless brand color scheme
+ *
+ * Primary Blue:  #073AB8
+ * Dark Navy:     #041638
+ * Surface Navy:  #071E4A
+ * Accent Blue:   #1A52D4
+ * Accent Teal:   #5BBAD5
+ * Text:          #F0F2F8
+ * Text Muted:    #8BA3D4
+ */
+
+:root {
+  --pw-blue: #073AB8;
+  --pw-blue-light: #1A52D4;
+  --pw-blue-dark: #052D8F;
+  --pw-navy: #041638;
+  --pw-navy-surface: #071E4A;
+  --pw-navy-border: #0C2A5E;
+  --pw-teal: #5BBAD5;
+  --pw-text: #F0F2F8;
+  --pw-text-muted: #8BA3D4;
+  --pw-success: #34D399;
+  --pw-error: #EF4444;
+}
+
 *,
 *::before,
 *::after {
@@ -8,8 +35,8 @@
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--pw-navy);
+  color: var(--pw-text);
   min-height: 100vh;
   overflow: hidden;
 }
@@ -22,25 +49,45 @@ body {
   overflow: hidden;
 }
 
+/* Header with Polaris branding */
 header {
-  text-align: center;
-  padding: 0.75rem 2rem;
-  border-bottom: 1px solid #1e293b;
+  background: linear-gradient(135deg, var(--pw-navy) 0%, var(--pw-blue) 100%);
+  padding: 0.6rem 1.5rem;
+  border-bottom: 1px solid var(--pw-navy-border);
   flex-shrink: 0;
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.header-text {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
 header h1 {
-  font-size: 1.4rem;
-  background: linear-gradient(135deg, #38bdf8, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .subtitle {
-  color: #64748b;
-  font-size: 0.8rem;
-  margin-top: 0.15rem;
+  color: var(--pw-teal);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 main {
@@ -71,7 +118,7 @@ main {
 .upload-btn {
   display: inline-block;
   padding: 0.4rem 0.85rem;
-  background: #3b82f6;
+  background: var(--pw-blue);
   color: #fff;
   border-radius: 0.375rem;
   font-size: 0.85rem;
@@ -80,7 +127,7 @@ main {
 }
 
 .upload-btn:hover {
-  background: #2563eb;
+  background: var(--pw-blue-light);
 }
 
 .upload-btn input[type="file"] {
@@ -89,17 +136,18 @@ main {
 
 .data-status {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--pw-text-muted);
 }
 
 .data-status.loaded {
-  color: #34d399;
+  color: var(--pw-success);
 }
 
 .viz-canvas {
   flex: 1;
-  background: #1e293b;
-  border-radius: 0.75rem;
+  background: var(--pw-navy-surface);
+  border: 1px solid var(--pw-navy-border);
+  border-radius: 0.5rem;
   padding: 0.5rem;
   min-height: 0;
   position: relative;
@@ -127,17 +175,18 @@ main {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #475569;
-  font-size: 1rem;
+  color: var(--pw-text-muted);
+  font-size: 0.95rem;
   text-align: center;
+  opacity: 0.6;
 }
 
 /* Chat Panel */
 .chat-panel {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #1e293b;
-  background: #111827;
+  border-left: 1px solid var(--pw-navy-border);
+  background: var(--pw-navy);
   min-height: 0;
   overflow: hidden;
 }
@@ -154,38 +203,40 @@ main {
 .chat-msg {
   max-width: 92%;
   padding: 0.6rem 0.85rem;
-  border-radius: 0.75rem;
-  font-size: 0.85rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
   line-height: 1.35;
   word-break: break-word;
 }
 
 .chat-msg.user {
   align-self: flex-end;
-  background: #3b82f6;
+  background: var(--pw-blue);
   color: #fff;
-  border-bottom-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.2rem;
 }
 
 .chat-msg.assistant {
   align-self: flex-start;
-  background: #1e293b;
-  color: #e2e8f0;
-  border-bottom-left-radius: 0.25rem;
+  background: var(--pw-navy-surface);
+  color: var(--pw-text);
+  border: 1px solid var(--pw-navy-border);
+  border-bottom-left-radius: 0.2rem;
 }
 
 .chat-msg.error {
   align-self: flex-start;
-  background: #7f1d1d;
-  color: #fecaca;
-  border-bottom-left-radius: 0.25rem;
+  background: #3B1014;
+  color: #FECACA;
+  border: 1px solid #7F1D1D;
+  border-bottom-left-radius: 0.2rem;
 }
 
 .chat-msg.system {
   align-self: center;
   background: transparent;
-  color: #64748b;
-  font-size: 0.75rem;
+  color: var(--pw-text-muted);
+  font-size: 0.72rem;
   text-align: center;
 }
 
@@ -193,24 +244,25 @@ main {
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--pw-navy-border);
   flex-shrink: 0;
 }
 
 .chat-input-area input {
   flex: 1;
   padding: 0.6rem 0.85rem;
-  border: 1px solid #334155;
-  border-radius: 0.5rem;
-  background: #0f172a;
-  color: #e2e8f0;
+  border: 1px solid var(--pw-navy-border);
+  border-radius: 0.375rem;
+  background: var(--pw-navy-surface);
+  color: var(--pw-text);
   font-size: 0.85rem;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .chat-input-area input:focus {
-  border-color: #3b82f6;
+  border-color: var(--pw-blue);
+  box-shadow: 0 0 0 1px var(--pw-blue);
 }
 
 .chat-input-area input:disabled {
@@ -220,17 +272,18 @@ main {
 
 .chat-input-area button {
   padding: 0.6rem 1.1rem;
-  background: #3b82f6;
+  background: var(--pw-blue);
   color: #fff;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   font-size: 0.85rem;
   cursor: pointer;
   transition: background 0.2s;
+  font-weight: 500;
 }
 
 .chat-input-area button:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--pw-blue-light);
 }
 
 .chat-input-area button:disabled {

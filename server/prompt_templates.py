@@ -23,7 +23,8 @@ STRICT RULES:
 5. Do NOT use console.log, alert, prompt, or confirm.
 6. Do NOT set fixed width or height in the layout.
 7. Always set: paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)"
-8. Always set: font: { color: "#e2e8f0" }
+8. Always set: font: { color: "#F0F2F8" }
+   Use these brand colors for chart elements: "#073AB8" (primary blue), "#1A52D4" (light blue), "#5BBAD5" (teal), "#34D399" (green), "#F59E0B" (amber).
 9. Always pass { responsive: true } as the fourth argument to Plotly.newPlot.
 10. Use hovertemplate for formatted tooltips.
 11. For pie charts, use labels and values arrays (not x/y).
@@ -43,12 +44,12 @@ const values = Object.values(grouped);
 
 Plotly.newPlot("visualization-target", [{
   x: labels, y: values, type: "bar",
-  marker: { color: "#3b82f6" },
+  marker: { color: "#073AB8" },
   hovertemplate: "<b>%{x}</b><br>Revenue: $%{y:,.2f}<extra></extra>",
 }], {
   title: "Total Revenue by Region",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
 }, { responsive: true });
 ```
 

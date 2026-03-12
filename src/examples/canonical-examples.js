@@ -27,12 +27,12 @@ const revenues = Object.values(grouped);
 
 Plotly.newPlot("visualization-target", [{
   x: regions, y: revenues, type: "bar",
-  marker: { color: ["#3b82f6","#10b981","#f59e0b","#ef4444"] },
+  marker: { color: ["#073AB8","#5BBAD5","#F59E0B","#E84855"] },
   hovertemplate: "<b>%{x}</b><br>Revenue: $%{y:,.2f}<extra></extra>",
 }], {
   title: "Total Revenue by Region",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Region" }, yaxis: { title: "Revenue ($)" },
 }, { responsive: true });
 `,
@@ -52,21 +52,21 @@ Plotly.newPlot("visualization-target", [{
   type: "table",
   header: {
     values: headers.map(h => "<b>" + h + "</b>"),
-    fill: { color: "#1e293b" },
-    font: { color: "#e2e8f0", size: 13 },
+    fill: { color: "#071E4A" },
+    font: { color: "#F0F2F8", size: 13 },
     align: "center", height: 32,
   },
   cells: {
     values: values,
-    fill: { color: [values[0].map((_, i) => i % 2 === 0 ? "#1e293b" : "#0f172a")] },
-    font: { color: "#cbd5e1", size: 12 },
+    fill: { color: [values[0].map((_, i) => i % 2 === 0 ? "#071E4A" : "#041638")] },
+    font: { color: "#B8C8E8", size: 12 },
     align: ["left","left","left","right","right","right"],
     height: 28,
   },
 }], {
   title: "Sales Data Table (24 rows)",
   paper_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   margin: { t: 40, l: 10, r: 10, b: 10 },
 }, { responsive: true });
 `,
@@ -89,13 +89,13 @@ const revenues = months.map(m => monthly[m]);
 
 Plotly.newPlot("visualization-target", [{
   x: months, y: revenues, type: "scatter", mode: "lines+markers",
-  line: { color: "#3b82f6", width: 3 },
-  marker: { size: 10, color: "#3b82f6", line: { color: "#1e293b", width: 2 } },
+  line: { color: "#073AB8", width: 3 },
+  marker: { size: 10, color: "#073AB8", line: { color: "#071E4A", width: 2 } },
   hovertemplate: "<b>%{x}</b><br>Revenue: $%{y:,.2f}<extra></extra>",
 }], {
   title: "Monthly Revenue Trend",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
 }, { responsive: true });
@@ -108,7 +108,7 @@ Plotly.newPlot("visualization-target", [{
     interactions: "Hover for details, box-select, lasso-select, click legend to toggle",
     code: `
 const data = window.__chartData;
-const colorMap = { "Widget A": "#3b82f6", "Widget B": "#10b981", "Widget C": "#f59e0b" };
+const colorMap = { "Widget A": "#073AB8", "Widget B": "#5BBAD5", "Widget C": "#F59E0B" };
 const products = [...new Set(data.map(r => r.product))];
 
 const traces = products.map(prod => {
@@ -119,7 +119,7 @@ const traces = products.map(prod => {
     text: rows.map(r => r.region),
     type: "scatter", mode: "markers", name: prod,
     marker: { size: 14, color: colorMap[prod], opacity: 0.85,
-      line: { color: "#1e293b", width: 1.5 } },
+      line: { color: "#071E4A", width: 1.5 } },
     hovertemplate: "<b>%{fullData.name}</b><br>Region: %{text}<br>Units: %{x}<br>Revenue: $%{y:,.2f}<extra></extra>",
   };
 });
@@ -127,7 +127,7 @@ const traces = products.map(prod => {
 Plotly.newPlot("visualization-target", traces, {
   title: "Units Sold vs Revenue (by Product)",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
@@ -152,7 +152,7 @@ Plotly.newPlot("visualization-target", [{
   labels: Object.keys(grouped),
   values: Object.values(grouped),
   type: "pie",
-  marker: { colors: ["#3b82f6","#10b981","#f59e0b"] },
+  marker: { colors: ["#073AB8","#5BBAD5","#F59E0B"] },
   textinfo: "label+percent",
   textfont: { color: "#fff", size: 14 },
   hovertemplate: "<b>%{label}</b><br>Revenue: $%{value:,.2f}<br>Share: %{percent}<extra></extra>",
@@ -160,7 +160,7 @@ Plotly.newPlot("visualization-target", [{
 }], {
   title: "Revenue Share by Product",
   paper_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   showlegend: true,
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
 }, { responsive: true });
@@ -175,7 +175,7 @@ Plotly.newPlot("visualization-target", [{
 const data = window.__chartData;
 const products = [...new Set(data.map(r => r.product))].sort();
 const months = [...new Set(data.map(r => r.date.substring(0, 7)))].sort();
-const colorMap = { "Widget A": "#3b82f6", "Widget B": "#10b981", "Widget C": "#f59e0b" };
+const colorMap = { "Widget A": "#073AB8", "Widget B": "#5BBAD5", "Widget C": "#F59E0B" };
 
 const traces = products.map(prod => {
   const vals = months.map(m => {
@@ -193,7 +193,7 @@ Plotly.newPlot("visualization-target", traces, {
   title: "Monthly Revenue by Product (Stacked)",
   barmode: "stack",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
@@ -212,12 +212,12 @@ const revenues = data.map(r => parseFloat(r.revenue));
 Plotly.newPlot("visualization-target", [{
   x: revenues, type: "histogram",
   nbinsx: 10,
-  marker: { color: "#818cf8", line: { color: "#1e293b", width: 1 } },
+  marker: { color: "#1A52D4", line: { color: "#071E4A", width: 1 } },
   hovertemplate: "Range: %{x}<br>Count: %{y}<extra></extra>",
 }], {
   title: "Distribution of Sale Revenue Amounts",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "Count", gridcolor: "rgba(148,163,184,0.15)" },
   bargap: 0.05,
@@ -233,7 +233,7 @@ Plotly.newPlot("visualization-target", [{
 const data = window.__chartData;
 const products = [...new Set(data.map(r => r.product))].sort();
 const months = [...new Set(data.map(r => r.date.substring(0, 7)))].sort();
-const colorMap = { "Widget A": "#3b82f6", "Widget B": "#10b981", "Widget C": "#f59e0b" };
+const colorMap = { "Widget A": "#073AB8", "Widget B": "#5BBAD5", "Widget C": "#F59E0B" };
 
 const traces = products.map(prod => {
   const vals = months.map(m =>
@@ -243,7 +243,7 @@ const traces = products.map(prod => {
   return {
     x: months, y: vals, name: prod, type: "scatter", mode: "lines+markers",
     line: { color: colorMap[prod], width: 3 },
-    marker: { size: 9, color: colorMap[prod], line: { color: "#1e293b", width: 1.5 } },
+    marker: { size: 9, color: colorMap[prod], line: { color: "#071E4A", width: 1.5 } },
     hovertemplate: "<b>%{fullData.name}</b><br>%{x}<br>Revenue: $%{y:,.2f}<extra></extra>",
   };
 });
@@ -251,7 +251,7 @@ const traces = products.map(prod => {
 Plotly.newPlot("visualization-target", traces, {
   title: "Monthly Revenue per Product (Click Legend to Toggle)",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Month", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "Revenue ($)", gridcolor: "rgba(148,163,184,0.15)" },
   legend: { bgcolor: "rgba(30,41,59,0.8)" },
@@ -277,12 +277,12 @@ const units = sorted.map(e => e[1]);
 
 Plotly.newPlot("visualization-target", [{
   y: regions, x: units, type: "bar", orientation: "h",
-  marker: { color: ["#ef4444","#f59e0b","#10b981","#3b82f6"] },
+  marker: { color: ["#E84855","#F59E0B","#5BBAD5","#073AB8"] },
   hovertemplate: "<b>%{y}</b><br>Units Sold: %{x:,}<extra></extra>",
 }], {
   title: "Regions by Total Units Sold (Sorted)",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   xaxis: { title: "Units Sold", gridcolor: "rgba(148,163,184,0.15)" },
   yaxis: { title: "" },
   margin: { l: 80 },
@@ -313,14 +313,14 @@ target.innerHTML = '<div id="viz-chart"></div><div id="viz-table" style="margin-
 
 Plotly.newPlot("viz-chart", [{
   x: products, y: profits, type: "bar",
-  marker: { color: profits.map(p => p >= 0 ? "#10b981" : "#ef4444") },
+  marker: { color: profits.map(p => p >= 0 ? "#5BBAD5" : "#E84855") },
   text: margins.map(m => m.toFixed(1) + "%"),
-  textposition: "outside", textfont: { color: "#e2e8f0" },
+  textposition: "outside", textfont: { color: "#F0F2F8" },
   hovertemplate: "<b>%{x}</b><br>Profit: $%{y:,.2f}<br>Margin: %{text}<extra></extra>",
 }], {
   title: "Total Profit by Product",
   paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#e2e8f0" },
+  font: { color: "#F0F2F8" },
   yaxis: { title: "Profit ($)", gridcolor: "rgba(148,163,184,0.15)" },
   margin: { t: 50, b: 30 }, height: 300,
 }, { responsive: true });
@@ -329,7 +329,7 @@ Plotly.newPlot("viz-table", [{
   type: "table",
   header: {
     values: ["<b>Product</b>","<b>Revenue</b>","<b>Cost</b>","<b>Profit</b>","<b>Margin</b>","<b>Units</b>","<b>Txns</b>"],
-    fill: { color: "#1e293b" }, font: { color: "#e2e8f0", size: 13 }, align: "center", height: 30,
+    fill: { color: "#071E4A" }, font: { color: "#F0F2F8", size: 13 }, align: "center", height: 30,
   },
   cells: {
     values: [
@@ -341,11 +341,11 @@ Plotly.newPlot("viz-table", [{
       products.map(p => stats[p].units),
       products.map(p => stats[p].count),
     ],
-    fill: { color: [["#0f172a","#1e293b","#0f172a"]] },
-    font: { color: "#cbd5e1", size: 12 }, align: ["left","right","right","right","right","right","right"], height: 28,
+    fill: { color: [["#041638","#071E4A","#041638"]] },
+    font: { color: "#B8C8E8", size: 12 }, align: ["left","right","right","right","right","right","right"], height: 28,
   },
 }], {
-  paper_bgcolor: "rgba(0,0,0,0)", font: { color: "#e2e8f0" },
+  paper_bgcolor: "rgba(0,0,0,0)", font: { color: "#F0F2F8" },
   margin: { t: 5, l: 10, r: 10, b: 5 }, height: 160,
 }, { responsive: true });
 `,
