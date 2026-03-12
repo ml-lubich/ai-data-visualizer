@@ -4,36 +4,57 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Data Visualizer - AIGIS Platform | Polaris Wireless</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/styles.css" />
     <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
   </head>
   <body>
     <div id="app">
       <header>
-        <div class="header-brand">
+        <div class="header-left">
           <img src="/public/polaris-logo.svg" alt="Polaris Wireless" class="logo" />
-          <div class="header-text">
+          <div class="header-title">
             <h1>AI Data Visualizer</h1>
-            <p class="subtitle">AIGIS Platform</p>
+            <span class="badge">AIGIS</span>
           </div>
+        </div>
+        <div class="header-right">
+          <span id="model-badge" class="model-badge"></span>
         </div>
       </header>
 
       <main>
         <section class="viz-panel">
           <div class="viz-toolbar">
-            <label class="upload-btn" for="csv-upload">
+            <label class="upload-btn" for="csv-upload" id="upload-area">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <span id="upload-label">Upload CSV</span>
               <input type="file" id="csv-upload" accept=".csv" />
             </label>
             <span id="data-status" class="data-status">No data loaded</span>
           </div>
           <div id="visualization-target" class="viz-canvas">
-            <div class="placeholder">Upload a CSV file and ask a question to generate a visualization.</div>
+            <div class="placeholder" id="empty-state">
+              <div class="placeholder-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M3 15l4-4 3 3 4-4 7 7"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                </svg>
+              </div>
+              <p>Upload a CSV and describe the chart you want.</p>
+              <p class="placeholder-hint">The AI will code it from scratch using Plotly.js</p>
+            </div>
           </div>
         </section>
 
         <section class="chat-panel">
+          <div class="chat-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span>Chat</span>
+          </div>
           <div id="chat-messages" class="chat-messages"></div>
           <form id="chat-form" class="chat-input-area">
             <input
@@ -43,7 +64,9 @@
               autocomplete="off"
               disabled
             />
-            <button type="submit" id="send-btn" disabled>Send</button>
+            <button type="submit" id="send-btn" disabled title="Send">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
           </form>
         </section>
       </main>

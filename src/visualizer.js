@@ -41,6 +41,9 @@ export function executeChartCode(code, data) {
       };
     }
 
+    const target2 = document.getElementById(TARGET_ID);
+    if (target2) target2.classList.add("has-chart");
+
     requestAnimationFrame(() => {
       fitChartsToContainer();
     });

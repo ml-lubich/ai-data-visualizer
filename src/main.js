@@ -159,10 +159,13 @@ async function init() {
     if (health.openrouter_configured) providers.push("OpenRouter (" + health.openrouter_model + ")");
     if (health.ollama_available) providers.push("Ollama (" + health.ollama_model + ")");
 
+    const modelBadge = document.getElementById("model-badge");
     if (providers.length > 0) {
-      addMessage("LLM ready: " + providers.join(" | "), "system");
+      addMessage("Ready. Describe any chart and the AI will code it.", "system");
+      if (modelBadge) modelBadge.textContent = providers[0];
     } else {
       addMessage("No LLM available. Set OPENROUTER_API_KEY or start Ollama.", "system");
+      if (modelBadge) modelBadge.textContent = "No model";
     }
   } catch (_err) {
     addMessage(
