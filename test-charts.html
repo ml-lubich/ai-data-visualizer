@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plotly.js Chart Test - No LLM Required</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
+    <style>
+      :root {
+        --navy: #030F28; --surface: #061A3E; --border: #0E2D6A;
+        --blue: #073AB8; --teal: #5BBAD5; --text: #EEF1FA; --muted: #7B94C8;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: "Inter", system-ui, sans-serif; background: var(--navy);
+        color: var(--text); -webkit-font-smoothing: antialiased; }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+      header { display: flex; align-items: center; justify-content: space-between;
+        padding: 0.6rem 1.5rem; border-bottom: 1px solid var(--border);
+        background: linear-gradient(135deg, var(--navy), #052D8F, var(--blue)); }
+      .header-left { display: flex; align-items: center; gap: 0.5rem; }
+      .logo { height: 22px; }
+      header h1 { font-size: 1rem; font-weight: 600; }
+      .badge { font-size: 0.55rem; font-weight: 600; color: var(--teal);
+        background: rgba(91,186,213,0.15); padding: 0.12rem 0.4rem;
+        border-radius: 0.2rem; letter-spacing: 0.06em; text-transform: uppercase; }
+      header span.count { font-size: 0.7rem; color: var(--muted); }
+
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+        gap: 0.75rem; padding: 0.75rem; }
+      .card { background: var(--surface); border: 1px solid var(--border);
+        border-radius: 0.5rem; overflow: hidden;
+        transition: border-color 0.3s, box-shadow 0.3s; }
+      .card:hover { border-color: #1A52D4; box-shadow: 0 0 15px rgba(7,58,184,0.2); }
+      .card-header { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+        display: flex; justify-content: space-between; align-items: center; }
+      .card-header h3 { font-size: 0.78rem; font-weight: 600; }
+      .card-header .tag { font-size: 0.6rem; color: var(--teal); background: rgba(91,186,213,0.1);
+        padding: 0.1rem 0.35rem; border-radius: 0.2rem; }
+      .card-body { height: 320px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <img src="/public/polaris-logo.svg" alt="Polaris Wireless" class="logo" />
+        <h1>Plotly.js Chart Test</h1>
+        <span class="badge">No LLM</span>
+      </div>
+      <span class="count" id="count"></span>
+    </header>
+    <div class="grid" id="grid"></div>
+
+    <script>
+      const CHARTS = [
+        {
+          title: "Bar Chart", tag: "bar",
+          traces: [{
+            x: ["North","South","East","West"],
+            y: [20600, 14150, 26450, 21950],
+            type: "bar",
+            marker: { color: ["#073AB8","#5BBAD5","#F59E0B","#E84855"] },
+            hovertemplate: "<b>%{x}</b><br>$%{y:,.0f}<extra></extra>",
+          }],
+          layout: { title: "Revenue by Region" },
+        },
+        {
+          title: "Pie Chart", tag: "pie",
+          traces: [{
+            labels: ["Widget A","Widget B","Widget C"],
+            values: [22000, 44400, 18250],
+            type: "pie",
+            marker: { colors: ["#073AB8","#5BBAD5","#F59E0B"] },
+            textinfo: "label+percent",
+            textfont: { color: "#fff", size: 12 },
+            hovertemplate: "<b>%{label}</b><br>$%{value:,.0f}<br>%{percent}<extra></extra>",
+          }],
+          layout: { title: "Revenue Share by Product" },
+        },
+        {
+          title: "Line Chart", tag: "line",
+          traces: [{
+            x: ["Jan","Feb","Mar","Apr","May","Jun"],
+            y: [14600, 15000, 9250, 17600, 17100, 11100],
+            type: "scatter", mode: "lines+markers",
+            line: { color: "#073AB8", width: 3 },
+            marker: { size: 9, color: "#073AB8", line: { color: "#030F28", width: 2 } },
+            hovertemplate: "<b>%{x}</b><br>$%{y:,.0f}<extra></extra>",
+          }],
+          layout: { title: "Monthly Revenue Trend" },
+        },
+        {
+          title: "Scatter Plot", tag: "scatter",
+          traces: [
+            { x: [120,130,140,110,125,105,100,90,85,95], y: [2400,2600,2800,2200,2500,2100,2000,1800,1700,1900],
+              mode: "markers", name: "Widget A", marker: { size: 12, color: "#073AB8", opacity: 0.8 } },
+            { x: [200,180,220,170,190,150,210], y: [6000,5400,6600,5100,5700,4500,6300],
+              mode: "markers", name: "Widget B", marker: { size: 12, color: "#5BBAD5", opacity: 0.8 } },
+            { x: [60,45,75,55,80,50], y: [3000,2250,3750,2750,4000,2500],
+              mode: "markers", name: "Widget C", marker: { size: 12, color: "#F59E0B", opacity: 0.8 } },
+          ],
+          layout: { title: "Units Sold vs Revenue", xaxis: { title: "Units" }, yaxis: { title: "Revenue ($)" } },
+        },
+        {
+          title: "Horizontal Bar", tag: "hbar",
+          traces: [{
+            y: ["South","North","West","East"],
+            x: [535, 740, 760, 810],
+            type: "bar", orientation: "h",
+            marker: { color: ["#E84855","#F59E0B","#5BBAD5","#073AB8"] },
+            hovertemplate: "<b>%{y}</b><br>%{x:,} units<extra></extra>",
+          }],
+          layout: { title: "Units Sold by Region (Sorted)" },
+        },
+        {
+          title: "Stacked Bar", tag: "stacked",
+          traces: [
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [4100,4500,4000,0,4800,4600], name: "Widget A",
+              type: "bar", marker: { color: "#073AB8" } },
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [10500,10500,0,11100,12300,0], name: "Widget B",
+              type: "bar", marker: { color: "#5BBAD5" } },
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [0,0,5250,6500,0,6500], name: "Widget C",
+              type: "bar", marker: { color: "#F59E0B" } },
+          ],
+          layout: { title: "Monthly Revenue by Product", barmode: "stack" },
+        },
+        {
+          title: "Histogram", tag: "histogram",
+          traces: [{
+            x: [2400,1700,6000,4500,2600,1900,5400,5100,3000,2250,2200,1800,6300,4800,3750,2750,2800,2000,6600,5700,4000,2500,2500,2100],
+            type: "histogram", nbinsx: 8,
+            marker: { color: "#1A52D4", line: { color: "#030F28", width: 1 } },
+            hovertemplate: "Range: %{x}<br>Count: %{y}<extra></extra>",
+          }],
+          layout: { title: "Revenue Distribution", bargap: 0.05 },
+        },
+        {
+          title: "Multi-Line", tag: "multi-line",
+          traces: [
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [4100,4500,4000,0,4800,4600],
+              mode: "lines+markers", name: "Widget A", line: { color: "#073AB8", width: 3 }, marker: { size: 8 } },
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [10500,10500,0,11100,12300,0],
+              mode: "lines+markers", name: "Widget B", line: { color: "#5BBAD5", width: 3 }, marker: { size: 8 } },
+            { x: ["Jan","Feb","Mar","Apr","May","Jun"], y: [0,0,5250,6500,0,6500],
+              mode: "lines+markers", name: "Widget C", line: { color: "#F59E0B", width: 3 }, marker: { size: 8 } },
+          ],
+          layout: { title: "Revenue per Product (Toggle Legend)", hovermode: "x unified" },
+        },
+        {
+          title: "Data Table", tag: "table",
+          traces: [{
+            type: "table",
+            header: {
+              values: ["<b>Product</b>","<b>Revenue</b>","<b>Cost</b>","<b>Profit</b>","<b>Margin</b>"],
+              fill: { color: "#071E4A" }, font: { color: "#EEF1FA", size: 12 },
+              align: "center", height: 30,
+            },
+            cells: {
+              values: [
+                ["Widget A","Widget B","Widget C"],
+                ["$22,000","$44,400","$18,250"],
+                ["$13,200","$23,680","$9,125"],
+                ["$8,800","$20,720","$9,125"],
+                ["40.0%","46.7%","50.0%"],
+              ],
+              fill: { color: [["#030F28","#061A3E","#030F28"]] },
+              font: { color: "#B8C8E8", size: 11 },
+              align: ["left","right","right","right","right"], height: 28,
+            },
+          }],
+          layout: { title: "Product Summary", margin: { t: 40, l: 5, r: 5, b: 5 } },
+        },
+        {
+          title: "Area Chart", tag: "area",
+          traces: [{
+            x: ["Jan","Feb","Mar","Apr","May","Jun"],
+            y: [14600,15000,9250,17600,17100,11100],
+            fill: "tozeroy",
+            type: "scatter", mode: "lines",
+            line: { color: "#073AB8", width: 2 },
+            fillcolor: "rgba(7,58,184,0.3)",
+            hovertemplate: "<b>%{x}</b><br>$%{y:,.0f}<extra></extra>",
+          }],
+          layout: { title: "Revenue Over Time (Area)" },
+        },
+        {
+          title: "Donut Chart", tag: "donut",
+          traces: [{
+            labels: ["North","South","East","West"],
+            values: [20600, 14150, 26450, 21950],
+            type: "pie", hole: 0.5,
+            marker: { colors: ["#073AB8","#5BBAD5","#F59E0B","#E84855"] },
+            textinfo: "label+percent",
+            textfont: { color: "#fff", size: 11 },
+          }],
+          layout: { title: "Revenue by Region (Donut)",
+            annotations: [{ text: "$83K", font: { size: 18, color: "#EEF1FA" }, showarrow: false }] },
+        },
+        {
+          title: "Grouped Bar", tag: "grouped",
+          traces: [
+            { x: ["North","South","East","West"], y: [2400,1700,6000,4500], name: "Jan", type: "bar", marker: { color: "#073AB8" } },
+            { x: ["North","South","East","West"], y: [2600,1900,5400,5100], name: "Feb", type: "bar", marker: { color: "#1A52D4" } },
+            { x: ["North","South","East","West"], y: [3000,2250,2200,1800], name: "Mar", type: "bar", marker: { color: "#5BBAD5" } },
+          ],
+          layout: { title: "Revenue by Region & Month", barmode: "group" },
+        },
+      ];
+
+      const defaultLayout = {
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#EEF1FA", family: "Inter" },
+        xaxis: { gridcolor: "rgba(14,45,106,0.4)" },
+        yaxis: { gridcolor: "rgba(14,45,106,0.4)" },
+        legend: { bgcolor: "rgba(6,26,62,0.8)", font: { size: 10 } },
+        margin: { t: 40, r: 20, b: 40, l: 50 },
+      };
+
+      const grid = document.getElementById("grid");
+      document.getElementById("count").textContent = CHARTS.length + " charts rendered";
+
+      CHARTS.forEach((chart, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML =
+          '<div class="card-header"><h3>' + chart.title + '</h3><span class="tag">' + chart.tag + '</span></div>' +
+          '<div class="card-body" id="chart-' + i + '"></div>';
+        grid.appendChild(card);
+
+        const merged = Object.assign({}, defaultLayout, chart.layout);
+        Plotly.newPlot("chart-" + i, chart.traces, merged, { responsive: true });
+      });
+    </script>
+  </body>
+</html>
