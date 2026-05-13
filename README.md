@@ -41,6 +41,7 @@ flowchart LR
 - [Project layout](#project-layout)
 - [Testing](#testing)
 - [Docs](#docs)
+- [🗺️ Repository map](#️-repository-map)
 
 ## Chart generation (sequence)
 
@@ -152,3 +153,51 @@ python tests/evaluate.py --model claude            # 10-question benchmark
 ## Docs
 
 See [docs/architecture.md](docs/architecture.md) for the full design.
+
+
+## 🗺️ Repository map
+
+Top-level layout of `ai-data-visualizer` rendered as a Mermaid mindmap (auto-generated from the on-disk tree).
+
+```mermaid
+mindmap
+  root((ai-data-visualizer))
+    docs/
+      AGENTS.md
+      architecture.md
+      requirements.md
+      testing.md
+    public/
+      sample_data
+    sample_data/
+      sales.csv
+      survey.csv
+    scripts/
+      validate-js-syntax.js
+    server/
+      __init__.py
+      app.py
+      config.py
+      llm_client.py
+      prompt_templates.py
+    src/
+      api-client.js
+      chat.js
+      data-parser.js
+      examples
+      main.js
+      styles.css
+    tests/
+      benchmark_questions.json
+      chart-config.test.js
+      data-parser.test.js
+      evaluate.py
+      test_app.py
+      test_prompt_templates.py
+    files
+      README.md
+      index.html
+      package.json
+      requirements.txt
+      vite.config.js
+```
