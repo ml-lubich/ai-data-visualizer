@@ -42,6 +42,7 @@ flowchart LR
 - [Testing](#testing)
 - [Docs](#docs)
 - [🗺️ Repository map](#️-repository-map)
+- [📊 Code composition](#-code-composition)
 
 ## Chart generation (sequence)
 
@@ -200,4 +201,21 @@ mindmap
       package.json
       requirements.txt
       vite.config.js
+```
+
+
+## 📊 Code composition
+
+File-type breakdown of source under this repo (skips `.git`, `node_modules`, build caches, lockfiles).
+
+```mermaid
+pie showData title File-type composition of ai-data-visualizer (34 files)
+    "JavaScript" : 12
+    "Python" : 8
+    "Markdown" : 5
+    "Other" : 3
+    "HTML" : 2
+    "JSON" : 2
+    "Text" : 1
+    "CSS" : 1
 ```
