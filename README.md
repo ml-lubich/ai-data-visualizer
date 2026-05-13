@@ -36,10 +36,39 @@ flowchart LR
 
 - [Quick start](#quick-start)
 - [Architecture at a glance](#architecture-at-a-glance)
+- [Chart generation (sequence)](#chart-generation-sequence)
 - [Usage](#usage)
 - [Project layout](#project-layout)
 - [Testing](#testing)
 - [Docs](#docs)
+
+## Chart generation (sequence)
+
+```mermaid
+sequenceDiagram
+    participant U as user (browser)
+    participant UI as src/main.js
+    participant DP as data-parser
+    participant API as api-client
+    participant FL as Flask /generate
+    participant PT as prompt_templates
+    participant LLM as OpenRouter
+
+    U->>UI: upload CSV
+    UI->>DP: parse rows + types
+    DP-->>UI: tabular preview
+    U->>UI: "bar chart of revenue by region"
+    UI->>API: POST /generate {prompt, schema}
+    API->>FL: HTTP
+    FL->>PT: build prompt(schema, prompt)
+    PT-->>FL: messages
+    FL->>LLM: chat.completions
+    LLM-->>FL: BokehJS spec (JSON)
+    FL-->>API: spec
+    API-->>UI: spec
+    UI->>UI: visualizer.render(spec)
+    UI-->>U: BokehJS chart
+```
 
 ## Quick start
 
